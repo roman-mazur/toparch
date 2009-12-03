@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/groovy"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.10.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.6.jar"/>
+	<classpathentry kind="lib" path="lib/batik-anim.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-awt-util.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-bridge.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-codec.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-css.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-dom.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-ext.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-extension.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-gui-util.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-gvt.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-parser.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-script.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-svg-dom.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-svggen.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-swing.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-transcoder.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-util.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/batik-xml.jar" sourcepath="lib/batik-src-1.7.zip"/>
+	<classpathentry kind="lib" path="lib/xalan-2.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/xerces_2_5_0.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis-ext.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.4.jar" sourcepath="lib/junit-4.4-sources.jar"/>
+	<classpathentry kind="output" path="output/eclipse-classes"/>
+</classpath>
