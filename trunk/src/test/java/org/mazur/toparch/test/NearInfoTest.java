@@ -68,5 +68,11 @@ public class NearInfoTest {
     assertTrue(connections.contains(14));
     assertTrue(connections.contains(15));
     assertTrue(connections.contains(3));
+    
+    connections = Arrays.asList(Utils.getConnected(10, 2));
+    assertTrue(connections.contains(9));
+    assertTrue(connections.contains(11));
+    assertTrue(connections.contains(8));
+    assertTrue(connections.contains(0));
   }
 }

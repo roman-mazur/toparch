@@ -14,6 +14,33 @@ public class Utils {
     { 1,  0, -1}
   };
   
+  public static boolean isSameCluster(final int i, final int j, int d) {
+    int cs = d << 1;
+    return i / cs == j / cs;
+  }
+  
+  public static NearInfo compareClusters(final int i, final int j, final int d) {
+    if (i == j) { return null; }
+    
+    int a = i > j ? i : j;
+    int b = i > j ? j : i;
+    int axis = 0;
+    int rd1 = 0, rd2 = 0;
+    while (a > 0) {
+      int d1 = a % 3, d2 = b % 3;
+      if (d1 != d2) { 
+        rd1 = i > j ? d1 : d2; 
+        rd2 = i > j ? d2 : d1; 
+        break; 
+      }
+      a /= 3; b /= 3;
+      axis++;
+    }
+    int source = d * CONNECTORS[rd1][rd2] + axis;
+    int destination = d * CONNECTORS[rd2][rd1] + axis;
+    return new NearInfo(axis, source, destination);
+  }
+  
   /**
    * @param i source cluster
    * @param j destination cluster
@@ -24,18 +51,19 @@ public class Utils {
     int a = i > j ? i : j;
     int b = i > j ? j : i;
     int dc = 0;
-    int axis = -1;
+    int axisIndex = 0, axis = -1;
     int rd1 = 0, rd2 = 0;
     while (a > 0) {
       int d1 = a % 3, d2 = b % 3;
       if (d1 != d2) { dc++; }
       if (dc > 1) { return null; }
-      if (d1 != d2) { 
+      if (d1 != d2) {
+        axis = axisIndex;
         rd1 = i > j ? d1 : d2; 
         rd2 = i > j ? d2 : d1; 
       }
       a /= 3; b /= 3;
-      axis++;
+      axisIndex++;
     }
     int source = d * CONNECTORS[rd1][rd2] + axis;
     int destination = d * CONNECTORS[rd2][rd1] + axis;
@@ -59,12 +87,12 @@ public class Utils {
     return info.source == i % clusterSize && info.dest == j % clusterSize;
   }
   
-  private static int getDigit(int number, int d) {
+  public static int getDigit(int number, int d) {
     while(d-- > 0) { number /= 3; }
     return number % 3;
   }
   
-  private static int setDigit(int number, final int d, final int v) {
+  public static int setDigit(int number, final int d, final int v) {
     // save lower digits
     int[] saved = new int[d];
     for (int i = 0; i < d; i++) {
@@ -92,7 +120,7 @@ public class Utils {
     nearDigit += sourceConnector == 0 ? -1 : 1;
     nearDigit %= 3;
     int nearCluster = setDigit(ci, axis, nearDigit);
-    return nearCluster * cs + ni + d;
+    return nearCluster * cs + (ni + d) % cs;
   }
   
   /**
@@ -104,10 +132,26 @@ public class Utils {
     int startNode = node / cs * cs;
     return new Integer[] {
       startNode + (node + 1) % cs,
-      startNode + (node - 1) % cs,
+      startNode + (node > 0 ? (node - 1) % cs : cs - 1),
       startNode + (node + d) % cs,
       getNearClusterConnection(node, d)
     };
+  }
+
+  public static int getInClusterDistance(final int i, final int j, final int d) {
+    int dif = j - i;
+    if (dif == 0) { return 0; }
+    int sign = dif > 0 ? 1 : -1;
+    dif = Math.abs(dif);
+    int cs = d << 1;
+    int next = 0;
+    if (dif > d) {
+      next = (i + (dif < d + (d >> 1) ? d : -sign)) % cs;
+    } else {
+      next = (i + (dif > d >> 1 ? d : sign)) % cs;
+    }
+    if (next < 0) { next = cs + next; }
+    return getInClusterDistance(next, j, d) + 1; 
   }
   
   private Utils() {}

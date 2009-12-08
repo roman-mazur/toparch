@@ -33,6 +33,9 @@ public class LinkDescriptor {
    */
   public void setDestination(final int destination) { this.destination = destination; }
   
-  
+  @Override
+  public String toString() {
+    return "{killed " + source + " <-> " + destination + "}";
+  }
   
 }

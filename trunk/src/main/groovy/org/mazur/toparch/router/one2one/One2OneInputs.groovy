@@ -1,7 +1,7 @@
-package org.mazur.toparch.router.one2one
+package org.mazur.toparch.router.one2one;
 
-import org.mazur.toparch.router.LinkDescriptor
-import org.mazur.toparch.router.InputData
+import org.mazur.toparch.router.LinkDescriptor;
+import org.mazur.toparch.router.InputData;
 
 /**
  * @version: $Id$

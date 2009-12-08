@@ -19,6 +19,7 @@ public abstract class Router<T extends InputData> {
   
   public Router() {
     inputDataFactory = createFactory();
+    System.out.println(inputDataFactory);
   }
   
   /**
@@ -42,6 +43,7 @@ public abstract class Router<T extends InputData> {
    * @return the next step info
    */
   public StepInfo next() {
+    System.out.println("111: " + inputDataFactory);
     return next(inputDataFactory.formData());
   }
   
@@ -62,6 +64,10 @@ public abstract class Router<T extends InputData> {
       result.getStepsInfo().add(si);
     }
     return result;
+  }
+  
+  protected InputDataPanelFactory<T> getInputDataFactory() {
+    return inputDataFactory;
   }
   
 }
