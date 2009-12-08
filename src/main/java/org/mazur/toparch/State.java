@@ -7,7 +7,7 @@ package org.mazur.toparch;
  */
 public final class State {
 
-  private static final State INSTANCE = new State();
+  public static final State INSTANCE = new State();
   
   private State() { } 
   

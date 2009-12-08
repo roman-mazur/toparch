@@ -2,6 +2,7 @@ package org.mazur.toparch.gui.drawer;
 
 import java.awt.Graphics2D;
 
+import org.mazur.toparch.Utils;
 import org.mazur.toparch.gui.utils.HQDrawer;
 
 /**
@@ -11,8 +12,19 @@ import org.mazur.toparch.gui.utils.HQDrawer;
  */
 public class Drawer3D implements Drawer {
 
+  private void drawHop(Graphics2D canvas, int i, int j, final boolean h) {
+    if (Utils.isSameCluster(i, j, 3) && Math.abs(j - i) < 5) {
+      HQDrawer.link3D(canvas, i, j, h);
+    } else {
+      HQDrawer.drawArcBetween(canvas, i, j, 1, h);
+    }
+    HQDrawer.node3D(canvas, i, h);
+    HQDrawer.node3D(canvas, j, h);
+  }
+
   @Override
   public void clearHop(Graphics2D canvas, int i, int j) {
+    drawHop(canvas, i, j, false);
   }
 
   @Override
@@ -20,13 +32,9 @@ public class Drawer3D implements Drawer {
     HQDrawer.draw3DHQ(canvas, 0, 0);
   }
 
-  /* (non-Javadoc)
-   * @see org.mazur.toparch.gui.drawer.Drawer#drawHop(java.awt.Graphics2D, int, int)
-   */
   @Override
   public void drawHop(Graphics2D canvas, int i, int j) {
-    // TODO Auto-generated method stub
-
+    drawHop(canvas, i, j, true);
   }
 
 }

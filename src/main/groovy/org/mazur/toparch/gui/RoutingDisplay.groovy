@@ -20,12 +20,21 @@ SwingBuilder.build {
         button(action : ZOOM_IN)
         button(action : ZOOM_OUT)
         inputsContainer = panel()
+        controlButtons = vbox(visible : false) {
+          hbox() {
+            button(action : MODEL_ALL) 
+            button(action : MODEL_NEXT)
+          }
+          scrollPane() {
+            textArea("12313123")
+          }
+        }
       }
     }
     panel(constraints : BL.CENTER) {
       borderLayout()
-      svgCanvas = new JSVGCanvas()
-      JSVGScrollPane scroll = new JSVGScrollPane(svgCanvas)
+      setSvgCanvas new JSVGCanvas()
+      JSVGScrollPane scroll = new JSVGScrollPane(getSvgCanvas())
       widget(scroll)
     }
     panel(constraints : BL.SOUTH) {
@@ -33,3 +42,5 @@ SwingBuilder.build {
     }
   }).visible = true
 }
+
+initialize()
