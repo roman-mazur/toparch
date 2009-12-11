@@ -10,7 +10,10 @@ public abstract class GroovyRouter<T extends InputData> extends Router<T> {
 
   @Override
   public StepInfo next() { 
-    return next(inputDataFactory.formData()) 
+    return next(formData()) 
   }
   
+  protected StepInfo next(final T input) { return null }
+  
+  protected T formData() { return inputDataFactory.formData() }
 }

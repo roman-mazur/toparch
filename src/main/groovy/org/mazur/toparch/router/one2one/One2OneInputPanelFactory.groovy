@@ -44,25 +44,27 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
   public One2OneInputs formData() {
     String killedString = killedField.text
     def killedLinks = []
-    if (killedString.trim().length() > 0) {
-      killedLinks = killedString.split(/\s*[,;]\s*/).collect() {
-        def nodes = it.split(/\s*-\s*/)
-        if (nodes.size() > 1) {
-          LinkDescriptor ld = new LinkDescriptor()
-          ld.setSource(Integer.parseInt(nodes[0]))
-          ld.setDestination(Integer.parseInt(nodes[1]))
-          return ld
-        }
-        int s = Integer.parseInt(nodes[0])
-        def connections = Utils.getConnected(s, State.INSTANCE.getDimension())
-        return connections.collect() {
-          LinkDescriptor ld = new LinkDescriptor()
-          ld.setSource(s)
-          ld.setDestination(it)
-          return ld
+    try {
+      if (killedString.trim().length() > 0) {
+        killedLinks = killedString.split(/\s*[,;]\s*/).collect() {
+          def nodes = it.split(/\s*-\s*/)
+          if (nodes.size() > 1) {
+            LinkDescriptor ld = new LinkDescriptor()
+            ld.setSource(Integer.parseInt(nodes[0]))
+            ld.setDestination(Integer.parseInt(nodes[1]))
+            return ld
+          }
+          int s = Integer.parseInt(nodes[0])
+          def connections = Utils.getConnected(s, State.INSTANCE.getDimension())
+          return connections.collect() {
+            LinkDescriptor ld = new LinkDescriptor()
+            ld.setSource(s)
+            ld.setDestination(it)
+            return ld
+          }
         }
       }
-    }
+    } catch (Exception e) { println e.message }
     println "killed: $killedLinks"
     return new One2OneInputs(
       source : Integer.parseInt(sourceField.text),

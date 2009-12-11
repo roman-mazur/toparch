@@ -44,22 +44,24 @@ public abstract class Router<T extends InputData> {
    */
   public StepInfo next() {
     System.out.println("111: " + inputDataFactory);
-    return next(inputDataFactory.formData());
+    return next(formData());
   }
   
   protected abstract StepInfo next(final T input);
+  
+  protected T formData() { return inputDataFactory.formData(); }
   
   /**
    * @return play list
    */
   public PlayList process() {
     reinit();
-    T inputData = inputDataFactory.formData();
+    //T inputData = formData();
     PlayList result = new PlayList();
     result.setName("Full play list for " + getName());
     result.setStepsInfo(new LinkedList<StepInfo>());
     while (true) {
-      StepInfo si = next(inputData);
+      StepInfo si = next();
       if (si == null) { break; }
       result.getStepsInfo().add(si);
     }
