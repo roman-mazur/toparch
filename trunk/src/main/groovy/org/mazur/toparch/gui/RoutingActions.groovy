@@ -22,6 +22,7 @@ import org.mazur.toparch.router.Router
 import org.mazur.toparch.play.HopInfo
 import org.mazur.toparch.play.StepInfo
 import org.mazur.toparch.router.one2one.One2OneRouter
+import org.mazur.toparch.play.PlayList
 
 import org.w3c.dom.Document
 
@@ -59,6 +60,9 @@ class RoutingActions {
   
   /** Control buttons. */
   static def controlButtons
+  
+  /** Routes text area. */
+  static def routeTextArea
   
   /** Current state. */
   private static RoutingState currentState = RoutingState.NONE
@@ -172,6 +176,11 @@ class RoutingActions {
       }
       currentState = RoutingState.ALL
       selectedRouter.reinit()
+      PlayList pl = selectedRouter.process()
+      pl.stepsInfo.each() {
+        drawCurrentStep(it)
+        routeTextArea.text = routeTextArea.text + it.toString() + "\n" 
+      }
     }
   )
   static MODEL_NEXT = swing.action(
@@ -186,9 +195,21 @@ class RoutingActions {
         statusLabel.text = "Finished"
       } else {
         drawCurrentStep(newStep)
-        statusLabel.text = (newStep.hopsInfo.collect { it.description }).toListString()
+        String t = (newStep.hopsInfo.collect { it.description }).toListString()
+        statusLabel.text = "$newStep.step $t"
       }
       lastStep = newStep
+      routeTextArea.text = routeTextArea.text + lastStep.toString() + '\n'  
+    }
+  )
+  
+  static RESET_ACTION = swing.action(
+    name : "Reset",
+    closure : {
+      currentState = RoutingState.NONE
+      lastStep = null
+      redraw()
+      routeTextArea.text = ''
     }
   )
   

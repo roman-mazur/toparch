@@ -14,7 +14,8 @@ SwingBuilder.build {
   (mainFrame = frame(title : "Routing display", pack : true, defaultCloseOperation : WC.EXIT_ON_CLOSE) {
     borderLayout()
     panel(constraints : BL.EAST) {
-      vbox() {
+      borderLayout()
+      vbox(constraints : BL.NORTH) {
         comboBox(items : ['2D', '3D'], action : SELECT_DIMENSION)
         comboBox(items : getRouterNames(), action : SELECT_ROUTER)
         button(action : ZOOM_IN)
@@ -24,11 +25,12 @@ SwingBuilder.build {
           hbox() {
             button(action : MODEL_ALL) 
             button(action : MODEL_NEXT)
-          }
-          scrollPane() {
-            textArea("12313123")
+            button(action : RESET_ACTION)
           }
         }
+      }
+      scrollPane(size : [300, 100], constraints : BL.CENTER) {
+        routeTextArea = textArea()
       }
     }
     panel(constraints : BL.CENTER) {

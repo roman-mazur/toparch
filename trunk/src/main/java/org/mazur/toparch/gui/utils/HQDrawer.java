@@ -210,8 +210,7 @@ public final class HQDrawer {
       for (int j = 0; j < 3; j++) {
         drawArcBetween(canvas, startNode + j, startNode + j + 3, 1, false);
       }
-      for (int j = 0; j < clustersCount; j++) {
-        if (i == j) { continue; }
+      for (int j = i + 1; j < clustersCount; j++) {
         NearInfo info = Utils.getNearInfo(i, j, 3);
         if (info == null) { continue; }
         int ni = clusterSize * i + info.getSource();

@@ -59,7 +59,36 @@ class One2OneRouter extends GroovyRouter<One2OneInputs> {
     int next = partners.find { checkLink(currentCluster * cs + it, inputs.killed) }
     int prev = currentNode
     currentNode = currentCluster * cs + next
-    return [hop(prev, currentNode, msg)]
+    return [hop(prev, currentNode, msg + "; go to $currentNode")]
+  }
+  
+  private def routeBetweenClusters(final int destCluster, final int d, final One2OneInputs input) {
+    int cs = d << 1
+    int currentCluster = currentNode / cs 
+    int[] differentAxises = Utils.compareClusters(currentCluster, destCluster, d)
+    def transitionClusters = differentAxises.collect() {
+      int v = Utils.getDigit(destCluster, it)
+      return Utils.setDigit(currentCluster, it, v)
+    }
+    println "Possible transition clusters: $transitionClusters"
+    int currentNodeIndex = currentNode % cs
+    def jumpPoints = transitionClusters.collect { Utils.getNearInfo(currentCluster, it, d).getSource() }
+    jumpPoints = jumpPoints.sort() { a, b -> 
+      Utils.getInClusterDistance(a, currentNodeIndex, d) <=> Utils.getInClusterDistance(b, currentNodeIndex, d) 
+    }
+    jumpPoints += jumpPoints.collect { it + (cs >> 1) } // other jump points
+    println "Jump points: $jumpPoints"
+    int njp = jumpPoints[0]
+    int jumpPoint = currentCluster * cs + njp
+    println "Jump point node: $jumpPoint"
+    if (jumpPoint == currentNode) {
+      currentNode = Utils.getNearClusterConnection(currentNode, d)
+      String msg = "Jumping from $jumpPoint to $currentNode"
+      return [hop(jumpPoint, currentNode, msg)]
+    } else {
+      String msg = "Look for $jumpPoint to jump"
+      return routeInCluster(njp, msg, d, input)
+    }
   }
   
   @Override
@@ -83,25 +112,10 @@ class One2OneRouter extends GroovyRouter<One2OneInputs> {
     if (currentCluster == destCluster) {
       String msg = "Come closer to $destNode"
       result.hopsInfo = routeInCluster(destNode % cs, msg, d, input)
-      return result
     } else {
-      NearInfo nearInfo = Utils.compareClusters(currentCluster, destCluster, d)
-      int v = Utils.getDigit(destCluster, nearInfo.getAxis())
-      int nextCluster = Utils.setDigit(currentCluster, nearInfo.getAxis(), v)
-      NearInfo connectionInfo = Utils.getNearInfo(currentCluster, nextCluster, d)
-      int njp = connectionInfo.getSource()
-      int jumpPoint = currentCluster * cs + njp
-      if (jumpPoint == currentNode) {
-        currentNode = nextCluster * cs + connectionInfo.getDest()
-        String msg = "Jumping from $jumpPoint to $currentNode"
-        result.hopsInfo = [hop(jumpPoint, currentNode, msg)]
-        return result
-      } else {
-        String msg = "Look for $jumpPoint to jump"
-        result.hopsInfo = routeInCluster(njp, msg, d, input)
-        return result
-      }
+      result.hopsInfo = routeBetweenClusters(destCluster, d, input)
     }
+    return result
   }
 
   @Override

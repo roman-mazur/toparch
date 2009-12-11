@@ -19,26 +19,28 @@ public class Utils {
     return i / cs == j / cs;
   }
   
-  public static NearInfo compareClusters(final int i, final int j, final int d) {
+  public static int[] compareClusters(final int i, final int j, final int d) {
     if (i == j) { return null; }
+    
+    int dc = 0;
+    int[] tempResult = new int[d];
     
     int a = i > j ? i : j;
     int b = i > j ? j : i;
     int axis = 0;
-    int rd1 = 0, rd2 = 0;
     while (a > 0) {
       int d1 = a % 3, d2 = b % 3;
       if (d1 != d2) { 
-        rd1 = i > j ? d1 : d2; 
-        rd2 = i > j ? d2 : d1; 
-        break; 
+        tempResult[dc] = axis; 
+        dc++;
       }
       a /= 3; b /= 3;
       axis++;
     }
-    int source = d * CONNECTORS[rd1][rd2] + axis;
-    int destination = d * CONNECTORS[rd2][rd1] + axis;
-    return new NearInfo(axis, source, destination);
+    
+    int[] result = new int[dc];
+    System.arraycopy(tempResult, 0, result, 0, dc);
+    return result;
   }
   
   /**
@@ -109,16 +111,21 @@ public class Utils {
     return number;
   }
   
-  private static int getNearClusterConnection(final int node, final int d) {
+  /**
+   * @param node node number
+   * @param d dimension
+   * @return connected node in the other cluster
+   */
+  public static int getNearClusterConnection(final int node, final int d) {
     int cs = d << 1;
     int ci = node / cs;
     int ni = node % cs;
     int axis = ni % d;
     int sourceConnector = ni / d;
     int nearDigit = getDigit(ci, axis);
-    System.out.println(nearDigit + " " + axis + " " + ci);
     nearDigit += sourceConnector == 0 ? -1 : 1;
     nearDigit %= 3;
+    if (nearDigit < 0) { nearDigit = 3 + nearDigit; }
     int nearCluster = setDigit(ci, axis, nearDigit);
     return nearCluster * cs + (ni + d) % cs;
   }

@@ -13,10 +13,14 @@ import org.mazur.toparch.gui.utils.HQDrawer;
 public class Drawer3D implements Drawer {
 
   private void drawHop(Graphics2D canvas, int i, int j, final boolean h) {
-    if (Utils.isSameCluster(i, j, 3) && Math.abs(j - i) < 5) {
+    if (Utils.isSameCluster(i, j, 3) && Math.abs(j - i) == 1) {
       HQDrawer.link3D(canvas, i, j, h);
     } else {
-      HQDrawer.drawArcBetween(canvas, i, j, 1, h);
+      if (i < j) {
+        HQDrawer.drawArcBetween(canvas, i, j, 1, h);
+      } else {
+        HQDrawer.drawArcBetween(canvas, j, i, 1, h);
+      }
     }
     HQDrawer.node3D(canvas, i, h);
     HQDrawer.node3D(canvas, j, h);
