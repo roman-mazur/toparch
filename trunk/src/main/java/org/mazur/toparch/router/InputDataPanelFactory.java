@@ -1,5 +1,7 @@
 package org.mazur.toparch.router;
 
+import java.util.List;
+
 import javax.swing.JPanel;
 
 /**
@@ -29,5 +31,7 @@ public abstract class InputDataPanelFactory<T extends InputData> {
    * @return input data
    */
   public abstract T formData();
+  
+  public abstract List<LinkDescriptor> getKilled();
   
 }
