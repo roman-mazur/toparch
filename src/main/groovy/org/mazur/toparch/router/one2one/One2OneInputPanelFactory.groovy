@@ -40,23 +40,23 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
     }
   }
   
-  @Override
-  public One2OneInputs formData() {
+  public List<LinkDescriptor> getKilled() {
     String killedString = killedField.text
     def killedLinks = []
     try {
       if (killedString.trim().length() > 0) {
-        killedLinks = killedString.split(/\s*[,;]\s*/).collect() {
+        killedString.split(/\s*[,;]\s*/).each() {
           def nodes = it.split(/\s*-\s*/)
           if (nodes.size() > 1) {
             LinkDescriptor ld = new LinkDescriptor()
             ld.setSource(Integer.parseInt(nodes[0]))
             ld.setDestination(Integer.parseInt(nodes[1]))
-            return ld
+            killedLinks += ld
+            return
           }
           int s = Integer.parseInt(nodes[0])
           def connections = Utils.getConnected(s, State.INSTANCE.getDimension())
-          return connections.collect() {
+          killedLinks += connections.collect() {
             LinkDescriptor ld = new LinkDescriptor()
             ld.setSource(s)
             ld.setDestination(it)
@@ -65,10 +65,15 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
         }
       }
     } catch (Exception e) { println e.message }
-    println "killed: $killedLinks"
+    return killedLinks
+  }
+  
+  @Override
+  public One2OneInputs formData() {
     return new One2OneInputs(
       source : Integer.parseInt(sourceField.text),
-      destination : Integer.parseInt(destField.text)
+      destination : Integer.parseInt(destField.text),
+      killed : getKilled()
     )
   }
 }

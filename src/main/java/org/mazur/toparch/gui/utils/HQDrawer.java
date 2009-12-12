@@ -18,44 +18,47 @@ public final class HQDrawer {
   private static final int CLUSTER_SIZE = 40;
   private static final int NODES_RADIUS = 5;
   
-  private static final Color NODES_COLOR = Color.BLUE; 
-  private static final Color NODES_COLOR_H = Color.GREEN; 
-  private static final Color LINK_COLOR = Color.GRAY; 
-  private static final Color LINK_COLOR_H = Color.MAGENTA; 
-  private static final Color TEXT_COLOR = Color.RED; 
-  private static final Color TEXT_COLOR_H = Color.BLACK; 
+  public static final Color NODES_COLOR = Color.BLUE; 
+  public static final Color NODES_COLOR_H = Color.GREEN; 
+  public static final Color NODES_COLOR_K = Color.RED; 
+  public static final Color LINK_COLOR = Color.GRAY; 
+  public static final Color LINK_COLOR_H = Color.MAGENTA; 
+  public static final Color LINK_COLOR_K = Color.RED; 
+  public static final Color TEXT_COLOR = Color.RED; 
+  public static final Color TEXT_COLOR_H = Color.BLACK; 
+  public static final Color TEXT_COLOR_K = Color.WHITE; 
   
   private static final int COUNT_3D = 27 * 6;
   private static final int RADIUS_3D = (int)(NODES_RADIUS * (COUNT_3D >> 1) * 0.8);
   private static final double ANGLED_3D = 2 * Math.PI / COUNT_3D;
   
-  public static void node3D(final Graphics2D canvas, final int number, final boolean h) {
-    node(canvas, get3DNodeX(number), get3DNodeY(number), number, h);
+  public static void node3D(final Graphics2D canvas, final int number, final Color color, final Color textColor) {
+    node(canvas, get3DNodeX(number), get3DNodeY(number), number, color, textColor);
   }
-  public static void node2D(final Graphics2D canvas, final int number, final boolean h) {
-    node(canvas, get2DNodeX(number), get2DNodeY(number), number, h);
+  public static void node2D(final Graphics2D canvas, final int number, final Color color, Color textColor) {
+    node(canvas, get2DNodeX(number), get2DNodeY(number), number, color, textColor);
   }
-  private static void node(final Graphics2D canvas, final int x, final int y, final int number, final boolean h) {
+  private static void node(final Graphics2D canvas, final int x, final int y, final int number, final Color color, final Color textColor) {
     int r = NODES_RADIUS, d = r << 1;
     Ellipse2D.Double circle = new Ellipse2D.Double(x - r, y - r, d, d);
-    canvas.setPaint(h ? NODES_COLOR_H : NODES_COLOR);
+    canvas.setPaint(color);
     canvas.fill(circle);
-    canvas.setPaint(h ? TEXT_COLOR_H : TEXT_COLOR);
+    canvas.setPaint(textColor);
     canvas.setFont(new Font(Font.MONOSPACED, 0, 5));
     canvas.drawString(String.valueOf(number), x - 3, y + 1);
   }
   
-  public static void link2D(final Graphics2D canvas, final int i, final int j, final boolean h) {
-    link(canvas, get2DNodeX(i), get2DNodeY(i), get2DNodeX(j), get2DNodeY(j), h);
+  public static void link2D(final Graphics2D canvas, final int i, final int j, final Color color) {
+    link(canvas, get2DNodeX(i), get2DNodeY(i), get2DNodeX(j), get2DNodeY(j), color);
   }
-  public static void link3D(final Graphics2D canvas, final int i, final int j, final boolean h) {
-    link(canvas, get3DNodeX(i), get3DNodeY(i), get3DNodeX(j), get3DNodeY(j), h);
+  public static void link3D(final Graphics2D canvas, final int i, final int j, final Color color) {
+    link(canvas, get3DNodeX(i), get3DNodeY(i), get3DNodeX(j), get3DNodeY(j), color);
   }
   private static void link(final Graphics2D canvas, final int x1, final int y1, final int x2, final int y2) {
-    link(canvas, x1, y1, x2, y2, false);
+    link(canvas, x1, y1, x2, y2, LINK_COLOR);
   }
-  private static void link(final Graphics2D canvas, final int x1, final int y1, final int x2, final int y2, final boolean h) {
-    canvas.setPaint(h ? LINK_COLOR_H : LINK_COLOR);
+  private static void link(final Graphics2D canvas, final int x1, final int y1, final int x2, final int y2, final Color color) {
+    canvas.setPaint(color);
     canvas.drawLine(x1, y1, x2, y2);
   }
 
@@ -72,13 +75,13 @@ public final class HQDrawer {
     link(canvas, x1, y1, x3, y3);
     link(canvas, x2, y2, x4, y4);
     int base = clusterNumber << 2;
-    node(canvas, x1, y1, base + 1, false);
-    node(canvas, x2, y2, base + 2, false);
-    node(canvas, x3, y3, base + 3, false);
-    node(canvas, x4, y4, base, false);
+    node(canvas, x1, y1, base + 1, NODES_COLOR, TEXT_COLOR);
+    node(canvas, x2, y2, base + 2, NODES_COLOR, TEXT_COLOR);
+    node(canvas, x3, y3, base + 3, NODES_COLOR, TEXT_COLOR);
+    node(canvas, x4, y4, base, NODES_COLOR, TEXT_COLOR);
   }
 
-  public static void arc2D(final Graphics2D canvas, final int i, final int j, final boolean h) {
+  public static void arc2D(final Graphics2D canvas, final int i, final int j, final Color color) {
     final int a = CLUSTER_SIZE >> 1, b = a >> 1;
     int x1 = get2DNodeX(i), y1 = get2DNodeY(i);
     int x2 = get2DNodeX(j), y2 = get2DNodeY(j);
@@ -87,7 +90,7 @@ public final class HQDrawer {
       int topY = y1 > y2 ? y2 : y1;
       int bottomY = y1 > y2 ? y1 : y2;
       int rx = x1 + a;
-      link(canvas, rx, topY + b, rx, bottomY - b, h);
+      link(canvas, rx, topY + b, rx, bottomY - b, color);
       canvas.drawArc(x1, topY - b, a, CLUSTER_SIZE, 0, arc);
       canvas.drawArc(x1, bottomY - a - b, a, CLUSTER_SIZE, arc + 90, arc);
     } else {  // horizontal
@@ -95,7 +98,7 @@ public final class HQDrawer {
       int rightX = x1 > x2 ? x1 : x2;
       final int height = a + (CLUSTER_GAP >> 1);
       final int yy = y1 + height;
-      link(canvas, leftX + b, yy, rightX - b, yy, h); 
+      link(canvas, leftX + b, yy, rightX - b, yy, color); 
       canvas.drawArc(leftX - b, y1, CLUSTER_SIZE, height, arc, arc);
       canvas.drawArc(rightX - a - b, y1, CLUSTER_SIZE, height, 2 * arc, arc);
     }
@@ -177,8 +180,8 @@ public final class HQDrawer {
     
   }
   
-  public static void drawArcBetween(final Graphics2D canvas, final int i, final int j, final int k, boolean highlight) {
-    canvas.setPaint(highlight ? LINK_COLOR_H : LINK_COLOR);
+  public static void drawArcBetween(final Graphics2D canvas, final int i, final int j, final int k, Color color) {
+    canvas.setPaint(color);
     int x1 = get3DNodeX(i), y1 = get3DNodeY(i), x2 = get3DNodeX(j), y2 = get3DNodeY(j);
     int h = Math.abs(y1 - y2), w = Math.abs(x1 - x2); 
     int arc = 90;
@@ -206,22 +209,22 @@ public final class HQDrawer {
         int ni = startNode + j;
         link(canvas, get3DNodeX(ni), get3DNodeY(ni), get3DNodeX(ni + 1), get3DNodeY(ni + 1));
       }
-      drawArcBetween(canvas, startNode, startNode + clusterSize - 1, 1, false);
+      drawArcBetween(canvas, startNode, startNode + clusterSize - 1, 1, LINK_COLOR);
       for (int j = 0; j < 3; j++) {
-        drawArcBetween(canvas, startNode + j, startNode + j + 3, 1, false);
+        drawArcBetween(canvas, startNode + j, startNode + j + 3, 1, LINK_COLOR);
       }
       for (int j = i + 1; j < clustersCount; j++) {
         NearInfo info = Utils.getNearInfo(i, j, 3);
         if (info == null) { continue; }
         int ni = clusterSize * i + info.getSource();
         int nj = clusterSize * j + info.getDest();
-        drawArcBetween(canvas, ni, nj, 1, false);
+        drawArcBetween(canvas, ni, nj, 1, LINK_COLOR);
         //link(canvas, get3DNodeX(ni), get3DNodeY(ni), get3DNodeX(nj), get3DNodeY(nj));
       }
     }
     
     for (int i = 0; i < COUNT_3D; i++) {
-      node(canvas, get3DNodeX(i), get3DNodeY(i), i, false);
+      node(canvas, get3DNodeX(i), get3DNodeY(i), i, NODES_COLOR, TEXT_COLOR);
     }
   }
   

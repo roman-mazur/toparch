@@ -23,6 +23,7 @@ import org.mazur.toparch.play.HopInfo
 import org.mazur.toparch.play.StepInfo
 import org.mazur.toparch.router.one2one.One2OneRouter
 import org.mazur.toparch.play.PlayList
+import org.mazur.toparch.router.LinkDescriptor
 
 import org.w3c.dom.Document
 
@@ -114,6 +115,11 @@ class RoutingActions {
     currentCanvas.commitDraw()
   }
   
+  private static void drawKilled(final List<LinkDescriptor> killed) {
+    selectedDrawer.drawKilled(currentCanvas.graphics, killed)
+    currentCanvas.commitDraw()
+  }
+  
   static SELECT_ROUTER = swing.action(
     name : "Select router",
     closure : { ActionEvent actionEvent ->
@@ -177,6 +183,7 @@ class RoutingActions {
       currentState = RoutingState.ALL
       selectedRouter.reinit()
       PlayList pl = selectedRouter.process()
+      drawKilled(selectedRouter.getInputDataFactory().getKilled())
       pl.stepsInfo.each() {
         drawCurrentStep(it)
         routeTextArea.text = routeTextArea.text + it.toString() + "\n" 
@@ -189,6 +196,7 @@ class RoutingActions {
       if (currentState == RoutingState.NONE) { selectedRouter.reinit() }
       if (currentState != RoutingState.ALL) { currentState = RoutingState.ONE }
       clearLastStep()
+      drawKilled(selectedRouter.getInputDataFactory().getKilled())
       StepInfo newStep = selectedRouter.next()
       if (!newStep) {
         currentState = RoutingState.NONE
