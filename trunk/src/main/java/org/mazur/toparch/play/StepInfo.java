@@ -16,18 +16,18 @@ public class StepInfo {
   private List<HopInfo> hopsInfo = null;
 
   /** Messages distribution. */
-  private String[][] messagesDistribution;
+  private int[][] messagesDistribution;
   
   /**
    * @return the messagesDistribution
    */
-  public String[][] getMessagesDistribution() {
+  public int[][] getMessagesDistribution() {
     return messagesDistribution;
   }
   /**
    * @param messagesDistribution the messagesDistribution to set
    */
-  public void setMessagesDistribution(String[][] messagesDistribution) {
+  public void setMessagesDistribution(int[][] messagesDistribution) {
     this.messagesDistribution = messagesDistribution;
   }
 
