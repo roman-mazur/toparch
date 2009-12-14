@@ -7,6 +7,11 @@ package org.mazur.toparch;
  */
 public final class State {
 
+  public static final String[][] TEST_MESSAGES = new String[][] {
+    {"123", "223"},
+    {"123", "223", "323"}
+  };
+  
   public static final State INSTANCE = new State();
   
   private State() { } 

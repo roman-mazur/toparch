@@ -15,6 +15,22 @@ public class StepInfo {
   /** List of hops. */
   private List<HopInfo> hopsInfo = null;
 
+  /** Messages distribution. */
+  private String[][] messagesDistribution;
+  
+  /**
+   * @return the messagesDistribution
+   */
+  public String[][] getMessagesDistribution() {
+    return messagesDistribution;
+  }
+  /**
+   * @param messagesDistribution the messagesDistribution to set
+   */
+  public void setMessagesDistribution(String[][] messagesDistribution) {
+    this.messagesDistribution = messagesDistribution;
+  }
+
   /**
    * @return the step
    */
