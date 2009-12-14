@@ -40,8 +40,7 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
     }
   }
   
-  public List<LinkDescriptor> getKilled() {
-    String killedString = killedField.text
+  public static List<LinkDescriptor> parseKilled(final String killedString) {
     def killedLinks = []
     try {
       if (killedString.trim().length() > 0) {
@@ -67,6 +66,8 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
     } catch (Exception e) { println e.message }
     return killedLinks
   }
+  
+  public List<LinkDescriptor> getKilled() { return parseKilled(killedField.text) }
   
   @Override
   public One2OneInputs formData() {
