@@ -24,6 +24,7 @@ import org.mazur.toparch.play.StepInfo
 import org.mazur.toparch.router.one2one.One2OneRouter
 import org.mazur.toparch.play.PlayList
 import org.mazur.toparch.router.LinkDescriptor
+import org.mazur.toparch.router.many2many.personolized.M2MPRouter;
 
 import org.w3c.dom.Document
 
@@ -43,7 +44,7 @@ class RoutingActions {
   ]
   
   /** Routers. */
-  private static def routers = [new One2OneRouter(), null]
+  private static def routers = [new One2OneRouter(), new M2MPRouter()]
   
   /** Selected router. */
   private static Router<?> selectedRouter = routers[0]
