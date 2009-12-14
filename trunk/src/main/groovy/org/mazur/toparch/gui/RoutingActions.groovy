@@ -56,6 +56,9 @@ class RoutingActions {
   /** Inputs data container. */
   static JPanel inputsContainer
   
+  /** Messages distribution panel. */
+  static JPanel messagesDistributionPanel
+  
   /** Main frame. */
   static def mainFrame
   
@@ -118,6 +121,17 @@ class RoutingActions {
   private static void drawKilled(final List<LinkDescriptor> killed) {
     selectedDrawer.drawKilled(currentCanvas.graphics, killed)
     currentCanvas.commitDraw()
+  }
+
+  private static def buildLastStepMessages() {
+    return swing.panel(layout: swing.gridLayout(cols: 1, rows: lastStep.messagesDistribution.length)) {
+      lastStep.messagesDistribution.eachWithIndex { nodeMessages, nodeIndex ->
+        hbox() {
+          label("Node ${nodeIndex + 1}: ")
+          nodeMessages.each { label("  $it  |") }
+        }
+      }
+    }
   }
   
   static SELECT_ROUTER = swing.action(
@@ -207,7 +221,11 @@ class RoutingActions {
         statusLabel.text = "$newStep.step $t"
       }
       lastStep = newStep
-      routeTextArea.text = routeTextArea.text + lastStep.toString() + '\n'  
+      routeTextArea.text = routeTextArea.text + lastStep.toString() + '\n'
+      if (lastStep?.messagesDistribution != null) {
+        messagesDistributionPanel.removeAll()
+        messagesDistributionPanel.add(buildLastStepMessages())
+      }
     }
   )
   
@@ -218,6 +236,7 @@ class RoutingActions {
       lastStep = null
       redraw()
       routeTextArea.text = ''
+      messagesDistributionPanel.removeAll()
     }
   )
   

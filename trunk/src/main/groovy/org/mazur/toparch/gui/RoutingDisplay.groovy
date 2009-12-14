@@ -40,7 +40,9 @@ SwingBuilder.build {
       widget(scroll)
     }
     panel(constraints : BL.SOUTH) {
-      statusLabel = label("Ready to work ;)")
+      borderLayout()
+      statusLabel = label(text : "Ready to work ;)", constraints : BL.NORTH)
+      messagesDistributionPanel = panel(constraints : BL.CENTER) { borderLayout() }
     }
   }).visible = true
 }

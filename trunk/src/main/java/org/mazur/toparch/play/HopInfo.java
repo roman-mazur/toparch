@@ -12,7 +12,7 @@ public class HopInfo {
   private int destination;
   /** Description. */
   private String description;
-  
+
   /**
    * @return the source
    */
