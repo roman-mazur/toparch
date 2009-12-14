@@ -161,6 +161,10 @@ public class Utils {
     return getInClusterDistance(next, j, d) + 1; 
   }
   
+  public static int getNodesCount(final int d) {
+    return ((int)(Math.pow(3, d)) * d) << 1;
+  }
+  
   private Utils() {}
   
   public static class NearInfo {

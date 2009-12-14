@@ -1,4 +1,4 @@
-package org.mazur.toparch.router.many2many;
+package org.mazur.toparch.router.all2all;
 
 import java.util.List;
 

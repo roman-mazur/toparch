@@ -1,4 +1,4 @@
-package org.mazur.toparch.router.many2many.personolized
+package org.mazur.toparch.router.all2all.personolized
 
 import org.mazur.toparch.router.one2one.One2OneInputPanelFactory;
 
@@ -12,7 +12,7 @@ import groovy.swing.SwingBuilder;
 
 import org.mazur.toparch.router.InputDataPanelFactory;
 import org.mazur.toparch.router.LinkDescriptor;
-import org.mazur.toparch.router.many2many.M2MRouterInputs;
+import org.mazur.toparch.router.all2all.M2MRouterInputs;
 
 class M2MPInputsPanelFactory extends InputDataPanelFactory<M2MRouterInputs> {
 
