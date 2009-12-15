@@ -161,8 +161,30 @@ public class Utils {
     return getInClusterDistance(next, j, d) + 1; 
   }
   
+  public static int getInClusterCircleDistance(final int i, final int j, final int d) {
+    int dif = Math.abs(i - j);
+    if (dif == 0) { return 0; }
+    int cs = d << 1;
+    int next = (i + (dif >= d ? d : 1)) % cs;
+    return getInClusterCircleDistance(next, j, d) + 1;
+  }
+  
   public static int getNodesCount(final int d) {
     return ((int)(Math.pow(3, d)) * d) << 1;
+  }
+  
+  public static int getFirstDestinationJP(final int currentNode, final int destinationNode, final int d) {
+    int cs = d << 1;
+    int currentCluster = currentNode / cs;
+    int destCluster = destinationNode / cs;
+    if (currentCluster == destCluster) { return destinationNode; }
+    int[] axises = Utils.compareClusters(currentCluster, destCluster, d);
+    int selectedAxis = axises[0];
+    int v = Utils.getDigit(destCluster, selectedAxis);
+    int transitionCluster = Utils.setDigit(currentCluster, selectedAxis, v);
+    int connectJumpPoint = Utils.getNearInfo(currentCluster, transitionCluster, d).getSource();
+    connectJumpPoint += currentCluster * cs;
+    return connectJumpPoint;
   }
   
   private Utils() {}

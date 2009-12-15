@@ -24,6 +24,8 @@ import org.mazur.toparch.play.StepInfo
 import org.mazur.toparch.router.one2one.One2OneRouter
 import org.mazur.toparch.play.PlayList
 import org.mazur.toparch.router.LinkDescriptor
+
+import org.mazur.toparch.router.all2all.Node;
 import org.mazur.toparch.router.all2all.personolized.M2MPRouter;
 
 import org.w3c.dom.Document
@@ -47,7 +49,7 @@ class RoutingActions {
   private static def routers = [new One2OneRouter(), new M2MPRouter()]
   
   /** Selected router. */
-  private static Router<?> selectedRouter = routers[0]
+  private static Router<?> selectedRouter = routers[1]
   /** Selected drawer. */
   private static Drawer selectedDrawer = drawers[2]
                                                     
@@ -56,9 +58,6 @@ class RoutingActions {
   
   /** Inputs data container. */
   static JPanel inputsContainer
-  
-  /** Messages distribution panel. */
-  static JPanel messagesDistributionPanel
   
   /** Main frame. */
   static def mainFrame
@@ -106,10 +105,11 @@ class RoutingActions {
   }
   
   private static void clearLastStep() {
-    lastStep?.hopsInfo.each() { HopInfo hopInfo ->
-      selectedDrawer.clearHop(currentCanvas.graphics, hopInfo.source, hopInfo.destination)
-    }
-    currentCanvas.commitDraw()
+//    lastStep?.hopsInfo.each() { HopInfo hopInfo ->
+//      selectedDrawer.clearHop(currentCanvas.graphics, hopInfo.source, hopInfo.destination)
+//    }
+//    currentCanvas.commitDraw()
+    redraw()
   }
   
   private static void drawCurrentStep(final StepInfo info) {
@@ -124,11 +124,20 @@ class RoutingActions {
     currentCanvas.commitDraw()
   }
 
-  private static def buildLastStepMessages() {
-    return swing.panel(layout: swing.gridLayout(cols: 1, rows: lastStep.messagesDistribution.length)) {
-      lastStep.messagesDistribution.eachWithIndex { nodeMessages, nodeIndex ->
+  public static def buildLastStepMessages() {
+    String[][] messages = null
+    if (!lastStep?.messagesDistribution) {
+      try {
+        messages = selectedRouter.formMDistrib()
+      } catch (def e) { return swing.label("No messages") }
+    } else {
+      messages = lastStep.messagesDistribution
+    }
+    return swing.panel(layout: swing.gridLayout(cols: 1, rows: messages.length)) {
+      messages.eachWithIndex { nodeMessages, nodeIndex ->
         hbox() {
-          label("Node ${nodeIndex + 1}: ")
+          String index = Node.formNumber(nodeIndex, 3)
+          label("Node ${index}: ")
           nodeMessages.each { label("  $it  |") }
         }
       }
@@ -223,10 +232,6 @@ class RoutingActions {
       }
       lastStep = newStep
       routeTextArea.text = routeTextArea.text + lastStep.toString() + '\n'
-      if (lastStep?.messagesDistribution != null) {
-        messagesDistributionPanel.removeAll()
-        messagesDistributionPanel.add(buildLastStepMessages())
-      }
     }
   )
   
