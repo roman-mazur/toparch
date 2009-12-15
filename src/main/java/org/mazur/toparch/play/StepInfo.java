@@ -16,18 +16,18 @@ public class StepInfo {
   private List<HopInfo> hopsInfo = null;
 
   /** Messages distribution. */
-  private int[][] messagesDistribution;
+  private String[][] messagesDistribution;
   
   /**
    * @return the messagesDistribution
    */
-  public int[][] getMessagesDistribution() {
+  public String[][] getMessagesDistribution() {
     return messagesDistribution;
   }
   /**
    * @param messagesDistribution the messagesDistribution to set
    */
-  public void setMessagesDistribution(int[][] messagesDistribution) {
+  public void setMessagesDistribution(String[][] messagesDistribution) {
     this.messagesDistribution = messagesDistribution;
   }
 
@@ -50,6 +50,15 @@ public class StepInfo {
   
   @Override
   public String toString() {
-    return "<" + step + ". " + hopsInfo + ">";
+    if (hopsInfo == null || hopsInfo.size() < 3) {
+      return "<Step" + step + ". " + hopsInfo + ">";
+    }
+    StringBuilder hopsString = new StringBuilder();
+    if (hopsInfo != null) {
+      for (HopInfo hi : hopsInfo) {
+        hopsString.append("  ").append(hi).append("\n");
+      }
+    }
+    return "<===============Step" + step + ".===============\n" + hopsString + "==============================>";
   }
 }
