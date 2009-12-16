@@ -120,7 +120,7 @@ public class Node {
     return new ArrayList<Object>(result);
   }
 
-  public int[] findMaxNotMyMessage() {
+  public int[] findMaxNotMyMessage(final int direction) {
     int[] result = null;
     int d = State.INSTANCE.getDimension();
     int cs = d << 1;
@@ -132,7 +132,12 @@ public class Node {
       if (destination == number) { continue; }
       int connectJumpPoint = Utils.getFirstDestinationJP(number, destination, d);
       if (connectJumpPoint == number) { continue; }
-      int distance = Utils.getInClusterCircleDistance(nodeIndex, connectJumpPoint % cs, d);
+      int connectorIndex = connectJumpPoint % cs;
+      int next = Utils.getNextInCluster(nodeIndex, connectorIndex, d);
+      int check = (nodeIndex + d) % cs;
+      if (check < 0) { check += cs; }
+      if (check != next) { continue; }
+      int distance = Utils.getInClusterCircleDistance(nodeIndex, connectorIndex, d);
       if (result == null) {
         result = m;
         maxD = distance;

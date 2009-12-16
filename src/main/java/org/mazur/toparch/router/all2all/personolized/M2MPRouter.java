@@ -26,31 +26,52 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
 
   private List<Node> nodes, nextStepNodes;
   
-  private int step = 0, internalStep = 0;
+  private int step = 0;
   
   private HopResolver[] internalResolvers = new HopResolver[] {
-     // =================== opposite routing ===================
+      // =================== circle routing ===================
+      new HopResolver() {
+        @Override
+        public HopInfo getHop(final Node node) {
+          System.out.println("Process node: " + node.getNumber() + " (circle-1 routing)");
+          int d = State.INSTANCE.getDimension();
+          int cs = d << 1;
+          int[] message = node.findMaxNotMyMessage(-1);
+          if (message == null) { return null; }
+          StringBuilder description = new StringBuilder();
+          int currentCluster = node.getNumber() / cs;
+          int nodeIndex = node.getNumber() % cs;
+          nodeIndex--;
+          if (nodeIndex < 0) { nodeIndex = cs + nodeIndex; }
+          int destination = currentCluster * cs + nodeIndex; 
+          send(message, node.getNumber(), destination);
+          description.append("M[").append(message[0]).append(",").append(message[1]).append("] ");
+          HopInfo info = new HopInfo();
+          info.setDescription(description.toString());
+          info.setSource(node.getNumber());
+          info.setDestination(destination);
+          return info;
+        }
+      },
+
+      // =================== opposite routing ===================
      new HopResolver() {
       @Override
       public HopInfo getHop(final Node node) {
         System.out.println("Process node: " + node.getNumber() + " (opposite routing)");
         int d = State.INSTANCE.getDimension();
+        int[] m = node.findMaxNotMyMessage(d);
+        if (m == null) { return null; }
         int cs = d << 1;
-        int currentCluster = node.getNumber() / cs;
-        // divide messages into d groups and send to different jump points
         int jp = (node.getNumber() % cs + d) % cs;
-        int jumpPoint = currentCluster * cs + jp;
-        List<Object> toSend = node.findMessagesForJP(jumpPoint);
-        if (toSend.isEmpty()) { return null; }
+        int currentCluster = node.getNumber() / cs;
+        int next = currentCluster * cs + jp;
+        send(m, node.getNumber(), next);
         HopInfo info = new HopInfo();
         info.setSource(node.getNumber());
-        info.setDestination(jumpPoint);
+        info.setDestination(next);
         StringBuilder message = new StringBuilder();
-        for (Object mo : toSend) {
-          int[] m = (int[])mo;
-          send(m, node.getNumber(), jumpPoint);
-          message.append("M[").append(m[0]).append(",").append(m[1]).append("] ");
-        }
+        message.append("M[").append(m[0]).append(",").append(m[1]).append("] ");
         info.setDescription(message.toString());
         return info;
       }
@@ -63,49 +84,40 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
         System.out.println("Process node: " + node.getNumber() + " (opposite routing)");
         int d = State.INSTANCE.getDimension();
         int cs = d << 1;
-        int[] message = null;
+        int[] message = node.findMaxNotMyMessage(1);
+        if (message == null) { return null; }
         StringBuilder description = new StringBuilder();
         int currentCluster = node.getNumber() / cs;
-        int destination = -1, nodeIndex = node.getNumber() % cs;
-        while ((message = node.findMaxNotMyMessage()) != null) {
-          destination = currentCluster * cs + ((nodeIndex + 1) % cs); 
-          send(message, node.getNumber(), destination);
-          description.append("M[").append(message[0]).append(",").append(message[1]).append("] ");
-        }
-        if (destination != -1) {
-          HopInfo info = new HopInfo();
-          info.setDescription(description.toString());
-          info.setSource(node.getNumber());
-          info.setDestination(destination);
-          return info;
-        }
-        return null;
-      }
-    }
-  };
-  
-  // =================== clusters routing ===================
-  private HopResolver externalResolver = new HopResolver() {
-    @Override
-    public HopInfo getHop(final Node node) {
-      System.out.println("Process node: " + node.getNumber() + " (clusters routing)");
-      int d = State.INSTANCE.getDimension();
-      int[] message = null;
-      StringBuilder description = new StringBuilder();
-      int destination = -1;
-      while ((message = node.findFirstNotMyMessage()) != null) {
-        destination = Utils.getNearClusterConnection(node.getNumber(), d); 
+        int nodeIndex = node.getNumber() % cs;
+        int destination = currentCluster * cs + ((nodeIndex + 1) % cs); 
         send(message, node.getNumber(), destination);
         description.append("M[").append(message[0]).append(",").append(message[1]).append("] ");
-      }
-      if (destination != -1) {
         HopInfo info = new HopInfo();
         info.setDescription(description.toString());
         info.setSource(node.getNumber());
         info.setDestination(destination);
         return info;
       }
-      return null;
+    },
+    
+    // =================== clusters routing ===================
+    new HopResolver() {
+      @Override
+      public HopInfo getHop(final Node node) {
+        System.out.println("Process node: " + node.getNumber() + " (clusters routing)");
+        int d = State.INSTANCE.getDimension();
+        int[] message = node.findFirstForJump();
+        if (message == null) { return null; }
+        StringBuilder description = new StringBuilder();
+        int destination = Utils.getNearClusterConnection(node.getNumber(), d); 
+        send(message, node.getNumber(), destination);
+        description.append("M[").append(message[0]).append(",").append(message[1]).append("] ");
+        HopInfo info = new HopInfo();
+        info.setDescription(description.toString());
+        info.setSource(node.getNumber());
+        info.setDestination(destination);
+        return info;
+      }
     }
   };
   
@@ -156,7 +168,6 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
       nodes.add(node);
     }
     step = 0;
-    internalStep = 0;
   }
   
   protected boolean isKilled(final int src, final int dst, final List<LinkDescriptor> killed) {
@@ -182,13 +193,12 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
   protected StepInfo next(final M2MRouterInputs input) {
     copyNodes();
     StepInfo result = new StepInfo();
-    result.setStep(step++);
-    HopResolver resolver = internalResolvers[internalStep++ % internalResolvers.length];
+    result.setStep(step);
+    HopResolver resolver = internalResolvers[step++ % internalResolvers.length];
     List<HopInfo> hops = runResolver(resolver);
     if (hops.isEmpty()) {
-      internalStep = 0;
-      hops = runResolver(externalResolver);
-      if (hops.isEmpty()) { nodes = nextStepNodes; return null; }
+      nodes = nextStepNodes; 
+      return null;
     }
     result.setHopsInfo(hops);
     nodes = nextStepNodes;
