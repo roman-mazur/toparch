@@ -146,8 +146,14 @@ public class Utils {
   }
 
   public static int getInClusterDistance(final int i, final int j, final int d) {
+    int next = getNextInCluster(i, j, d);
+    if (next == i) { return 0; }
+    return getInClusterDistance(next, j, d) + 1; 
+  }
+  
+  public static int getNextInCluster(final int i, final int j, final int d) {
     int dif = j - i;
-    if (dif == 0) { return 0; }
+    if (dif == 0) { return i; }
     int sign = dif > 0 ? 1 : -1;
     dif = Math.abs(dif);
     int cs = d << 1;
@@ -158,9 +164,8 @@ public class Utils {
       next = (i + (dif > d >> 1 ? d : sign)) % cs;
     }
     if (next < 0) { next = cs + next; }
-    return getInClusterDistance(next, j, d) + 1; 
+    return next;
   }
-  
   public static int getInClusterCircleDistance(final int i, final int j, final int d) {
     int dif = Math.abs(i - j);
     if (dif == 0) { return 0; }
