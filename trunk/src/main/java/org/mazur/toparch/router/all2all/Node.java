@@ -1,9 +1,6 @@
 package org.mazur.toparch.router.all2all;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.TreeSet;
 
 import org.mazur.toparch.State;
@@ -20,9 +17,22 @@ public class Node {
   
   private Comparator<Object> mComparator = new Comparator<Object>() {
     @Override
-    public int compare(Object o1, Object o2) {
+    public int compare(final Object o1, final Object o2) {
       int[] m1 = (int[])o1, m2 = (int[])o2;
-      return (m1[1] - m2[1]) * 1000 + (m1[0] - m2[0]);
+      if (m1[0] == m2[0] && m1[1] == m2[1]) { return 0; }
+      int d1 = Utils.getRouteDistance(number, m1[1], State.INSTANCE.getDimension());
+      int d2 = Utils.getRouteDistance(number, m2[1], State.INSTANCE.getDimension());
+      int dif = d2 - d1;
+      if (dif != 0) { return dif; }
+//      if (m1[0] == number) { return 1; }
+//      if (m2[0] == number) { return -1; }
+      return 1000 * (m1[0] - m2[0]) + (m1[1] - m2[1]);
+//      if (number == m1[0]) {
+//        return -1;
+//      } else if (number == m2[0]) {
+//        return 1;
+//      }
+//      return 0;
     }
   };
   
@@ -76,89 +86,16 @@ public class Node {
     return this.messages.remove(new int[] {from, to});
   }
   
-  public List<Object> findMessagesForJP(final int jumpPoint) {
-    LinkedList<Object> result = new LinkedList<Object>();
-    int d = State.INSTANCE.getDimension();
-    for (Object mo : messages) {
-      int[] m = (int[])mo;
-      int destination = m[1];
-      if (destination == jumpPoint) {
-        result.add(mo);
-      } else {
-        int connectJumpPoint = Utils.getFirstDestinationJP(number, destination, d);
-        if (connectJumpPoint == jumpPoint) {
-          result.add(mo);
-        }
-      }
-    }
-    return result;
-  }
-
-  public int[] findFirstForJump() {
-    int d = State.INSTANCE.getDimension();
-    for (Object mo : messages) {
-      int[] m = (int[])mo;
-      int destination = m[1];
-      if (destination == number) { continue; }
-      int connectJumpPoint = Utils.getFirstDestinationJP(number, destination, d);
-      if (connectJumpPoint == number) { return m; }
-    }
-    return null;
-  }
-
-  public List<Object> findNotMyMessages() {
-    LinkedList<Object> result = new LinkedList<Object>();
-    int d = State.INSTANCE.getDimension();
-    for (Object mo : messages) {
-      int[] m = (int[])mo;
-      int destination = m[1];
-      if (destination == number) { continue; }
-      int connectJumpPoint = Utils.getFirstDestinationJP(number, destination, d);
-      if (connectJumpPoint == number) { continue; }
-      result.add(mo);
-    }  
-    return new ArrayList<Object>(result);
-  }
-
-  public int[] findMaxNotMyMessage(final int direction) {
-    int[] result = null;
-    int d = State.INSTANCE.getDimension();
-    int cs = d << 1;
-    int nodeIndex = number % cs;
-    int maxD = 0;
-    for (Object mo : messages) {
-      int[] m = (int[])mo;
-      int destination = m[1];
-      if (destination == number) { continue; }
-      int connectJumpPoint = Utils.getFirstDestinationJP(number, destination, d);
-      if (connectJumpPoint == number) { continue; }
-      int connectorIndex = connectJumpPoint % cs;
-      int next = Utils.getNextInCluster(nodeIndex, connectorIndex, d);
-      int check = (nodeIndex + d) % cs;
-      if (check < 0) { check += cs; }
-      if (check != next) { continue; }
-      int distance = Utils.getInClusterCircleDistance(nodeIndex, connectorIndex, d);
-      if (result == null) {
-        result = m;
-        maxD = distance;
-      } else if (maxD < distance) {
-        result = m;
-        maxD = distance;
-      }
-    }  
-    return result;
-  }
-  
-  public int[] findFirstNotMyMessage() {
-    for (Object mo : messages) {
-      int[] m = (int[])mo;
-      int destination = m[1];
-      if (destination != number) { return m; }
-    }  
-    return null;
-  }
-
   public void copyMessages(final Node node) {
     this.messages = new TreeSet<Object>(node.messages);
+  }
+  
+  public int[] selectMessage(final int nextNode) {
+    for (Object mo : messages) {
+      int[] m = (int[])mo;
+      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension());
+      if (nextNode == mNext) { return m; }
+    }
+    return null;
   }
 }
