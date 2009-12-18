@@ -37,7 +37,8 @@ SwingBuilder.build {
             button(action : MODEL_ALL) 
             button(action : MODEL_NEXT)
             button(action : RESET_ACTION)
-            button("Play")
+            button(action : PLAY_ACTION)
+            button(action : STOP_ACTION)
           }
         }
       }

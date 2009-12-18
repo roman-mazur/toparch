@@ -192,6 +192,38 @@ public class Utils {
     return connectJumpPoint;
   }
   
+  public static int getNextNode(final int i, final int j, final int d) {
+    if (i == j) { return -1; }
+    int cs = d << 1;
+    int clusterDest = -1;
+    int ci = i / cs, cj = j /cs;
+    if (ci == cj) {
+      clusterDest = j % cs;
+    } else {
+      int[] axises = compareClusters(ci, cj, d);
+      int axis = axises[0];
+      int nextCluster = setDigit(ci, axis, getDigit(cj, axis));
+      NearInfo ni = getNearInfo(ci, nextCluster, d);
+      clusterDest = ni.getSource();
+      // jump
+      if (clusterDest == i % cs) { return nextCluster * cs + ni.getDest(); }
+    }
+    // move
+    int res = getNextInCluster(i % cs, clusterDest, d);
+    res += ci * cs;
+    return res;
+  }
+  
+  public static int getRouteDistance(final int i, final int j, final int d) {
+    int currentNode = i;
+    int res = 0;
+    while (currentNode != j) {
+      currentNode = getNextNode(currentNode, j, d);
+      res++;
+    }
+    return res;
+  }
+  
   private Utils() {}
   
   public static class NearInfo {

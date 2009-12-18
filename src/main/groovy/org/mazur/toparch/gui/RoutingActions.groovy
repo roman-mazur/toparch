@@ -242,10 +242,34 @@ class RoutingActions {
       lastStep = null
       redraw()
       routeTextArea.text = ''
-      messagesDistributionPanel.removeAll()
+    }
+  )
+
+  private static Thread playThread = null
+  private static boolean playStop = false
+  
+  static PLAY_ACTION = swing.action(
+    name : "Play",
+    closure : {
+      playStop = false
+      playThread = new CThread(action : {
+        while (lastStep && !playStop) {
+          MODEL_NEXT.actionPerformed(null)
+          Thread.sleep 200
+        }
+        playThread = null
+      })
+      playThread.start()
     }
   )
   
+  static STOP_ACTION = swing.action(
+    name : "Stop",
+    closure : {
+      playStop = true
+    }
+  )
+
   static void initialize() {
     State.INSTANCE.dimension = 2
     [SELECT_DIMENSION, SELECT_ROUTER].each() { it.actionPerformed null }
@@ -264,4 +288,9 @@ class Canvas {
     graphics.getRoot(root)
     svgCanvas.setDocument(document)
   }
+}
+
+class CThread extends Thread {
+  def action = null
+  void run() { action() }
 }
