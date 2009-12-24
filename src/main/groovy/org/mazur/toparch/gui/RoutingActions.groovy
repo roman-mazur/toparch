@@ -49,7 +49,7 @@ class RoutingActions {
   private static def routers = [new One2OneRouter(), new M2MPRouter()]
   
   /** Selected router. */
-  private static Router<?> selectedRouter = routers[1]
+  private static Router<?> selectedRouter = routers[0]
   /** Selected drawer. */
   private static Drawer selectedDrawer = drawers[2]
                                                     
@@ -81,9 +81,8 @@ class RoutingActions {
   
   public static void setSvgCanvas(final JSVGCanvas c) {
     currentCanvas = new Canvas(svgCanvas : c)
-    AffineTransform at = c.getInitialTransform()
-    at.setToScale(2, 2)
-    c.resetRenderingTransform()
+    c.setSize(500, 400)
+    //c.setDocumentState(JSVGCanvas.ALWAYS_DYNAMIC);
   }
   
   private static Document createDocument() {
@@ -94,10 +93,11 @@ class RoutingActions {
   }
   
   private static void redraw() {
-    currentCanvas.document = (SVGDocument)createDocument()
-    currentCanvas.graphics = new SVGGraphics2D(currentCanvas.document)
-    selectedDrawer.drawBG(currentCanvas.graphics)
-    currentCanvas.commitDraw()
+    currentCanvas.commitDraw() {
+      currentCanvas.document = (SVGDocument)createDocument()
+      currentCanvas.graphics = new SVGGraphics2D(currentCanvas.document)
+      selectedDrawer.drawBG(currentCanvas.graphics)
+    }
   }
   
   public static def getRouterNames() {
@@ -113,15 +113,17 @@ class RoutingActions {
   }
   
   private static void drawCurrentStep(final StepInfo info) {
-    info?.hopsInfo.each() { HopInfo hopInfo ->
-      selectedDrawer.drawHop(currentCanvas.graphics, hopInfo.source, hopInfo.destination)
+    currentCanvas.commitDraw() {
+      info?.hopsInfo.each() { HopInfo hopInfo ->
+        selectedDrawer.drawHop(currentCanvas.graphics, hopInfo.source, hopInfo.destination)
+      }
     }
-    currentCanvas.commitDraw()
   }
   
   private static void drawKilled(final List<LinkDescriptor> killed) {
-    selectedDrawer.drawKilled(currentCanvas.graphics, killed)
-    currentCanvas.commitDraw()
+    currentCanvas.commitDraw() {
+      selectedDrawer.drawKilled(currentCanvas.graphics, killed)
+    }
   }
 
   public static def buildLastStepMessages() {
@@ -283,10 +285,24 @@ class Canvas {
   SVGDocument document
   JSVGCanvas svgCanvas
   
-  void commitDraw() {
+  void commitDraw(c) {
+//    def a = {
+//      c()
+//      Element root = document.getDocumentElement()
+//      graphics.getRoot(root)
+//      svgCanvas.setDocument(document)
+//    }
+//    def um = svgCanvas.getUpdateManager()
+//    if (um) {
+//      um.getUpdateRunnableQueue().invokeLater(new CThread(action : a))
+//    } else {
+//      a()
+//    }
+    c()
     Element root = document.getDocumentElement()
     graphics.getRoot(root)
     svgCanvas.setDocument(document)
+
   }
 }
 
