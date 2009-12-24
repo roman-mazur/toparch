@@ -1,6 +1,8 @@
 package org.mazur.toparch.router.all2all;
 
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeSet;
 
 import org.mazur.toparch.State;
@@ -78,24 +80,45 @@ public class Node {
   /**
    * @param messages the messages to set
    */
-  public void addMessage(final int from, final int to) {
-    this.messages.add(new int[] {from, to});
+  public void addMessage(final int from, final int to, final int variant) {
+    this.messages.add(new int[] {from, to, variant});
   }
   
-  public boolean removeMessage(final int from, final int to) {
-    return this.messages.remove(new int[] {from, to});
+  public int removeMessage(final int from, final int to) {
+    int[] m = (int[])this.messages.floor(new int[] {from, to, 0});
+    assert m != null;
+    this.messages.remove(m);
+    return m[2];
   }
   
   public void copyMessages(final Node node) {
     this.messages = new TreeSet<Object>(node.messages);
   }
   
-  public int[] selectMessage(final int nextNode) {
+  public void markMessages(final int nextNode) {
+    List<Object> toRemove = new LinkedList<Object>();
     for (Object mo : messages) {
       int[] m = (int[])mo;
-      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension());
-      if (nextNode == mNext) { return m; }
+      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension(), 0);
+      if (nextNode == mNext) { 
+        m[2]++;
+        if (m[2] == 4) { toRemove.add(m); }
+      }
+      if (mNext == -1) { toRemove.add(m); }
     }
-    return null;
+    messages.removeAll(toRemove);
+  }
+  
+  public int[] selectMessage(final int nextNode) {
+    List<Object> toRemove = new LinkedList<Object>();
+    int[] result = null;
+    for (Object mo : messages) {
+      int[] m = (int[])mo;
+      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension(), m[2]);
+      if (mNext == -1) { toRemove.add(m); }
+      if (nextNode == mNext) { result = m; break; }
+    }
+    messages.removeAll(toRemove);
+    return result;
   }
 }

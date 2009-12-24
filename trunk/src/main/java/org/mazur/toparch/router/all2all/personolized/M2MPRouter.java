@@ -87,8 +87,8 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     
     sourceNode = nextStepNodes.get(from);
     Node destinationNode = nextStepNodes.get(to);
-    sourceNode.removeMessage(m[0], m[1]);
-    destinationNode.addMessage(m[0], m[1]);
+    int v = sourceNode.removeMessage(m[0], m[1]);
+    destinationNode.addMessage(m[0], m[1], v);
   }
   
   public String[][] formMDistrib() {
@@ -118,7 +118,7 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     for (int i = 0; i < n; i++) {
       Node node = new Node();
       node.setNumber(i);
-      for (int j = 0; j < n; j++) { node.addMessage(i, j); }
+      for (int j = 0; j < n; j++) { node.addMessage(i, j, 0); }
       nodes.add(node);
     }
     step = 0;
@@ -134,9 +134,13 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     return false;
   }
   
-  private HopInfo resolve(final Node node, final HopResolver resolver) {
+  private HopInfo resolve(final Node node, final HopResolver resolver, final List<LinkDescriptor> killed) {
     System.out.println("Process node: " + node.getNumber() + " (circle-1 routing)");
     int nextNode = resolver.getNext(node.getNumber());
+    if (isKilled(node.getNumber(), nextNode, killed)) {
+      node.markMessages(nextNode);
+      return null;
+    }
     int[] message = node.selectMessage(nextNode);
     if (message == null) { return null; }
     StringBuilder description = new StringBuilder();
@@ -149,10 +153,10 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     return info;
   }
   
-  private List<HopInfo> runResolver(final HopResolver resolver) {
+  private List<HopInfo> runResolver(final HopResolver resolver, final List<LinkDescriptor> killed) {
     List<HopInfo> hops = new LinkedList<HopInfo>();
     for (Node node : nodes) {
-      HopInfo hi = resolve(node, resolver);
+      HopInfo hi = resolve(node, resolver, killed);
       if (hi != null) { hops.add(hi); }
     }
     return hops;
@@ -165,7 +169,7 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     int internalStep = 0;
     while (internalStep < internalResolvers.length) {
       HopResolver resolver = internalResolvers[step++ % internalResolvers.length];
-      List<HopInfo> hops = runResolver(resolver);
+      List<HopInfo> hops = runResolver(resolver, input.getKilled());
       if (hops.isEmpty()) {
         nodes = nextStepNodes; 
         internalStep++;
