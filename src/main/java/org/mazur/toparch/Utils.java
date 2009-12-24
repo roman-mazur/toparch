@@ -146,17 +146,25 @@ public class Utils {
   }
 
   public static int getInClusterDistance(final int i, final int j, final int d) {
-    int next = getNextInCluster(i, j, d);
+    int next = getNextInCluster(i, j, d, 0);
     if (next == i) { return 0; }
     return getInClusterDistance(next, j, d) + 1; 
   }
   
-  public static int getNextInCluster(final int i, final int j, final int d) {
+  public static int getNextInCluster(final int i, int j, final int d, final int variant) {
+    int cs = d << 1;
+    switch (variant) {
+    case 0: break;
+    case 1: j -= d; if (j < 0) { j = j + cs; } break;
+    case 2: j += d >> 1; j %= cs; break;
+    case 3: j += d; j %= cs; break;
+    default: return -1;
+    }
+    
     int dif = j - i;
     if (dif == 0) { return i; }
     int sign = dif > 0 ? 1 : -1;
     dif = Math.abs(dif);
-    int cs = d << 1;
     int next = 0;
     if (dif > d) {
       next = (i + (dif < d + (d >> 1) ? d : -sign)) % cs;
@@ -192,7 +200,7 @@ public class Utils {
     return connectJumpPoint;
   }
   
-  public static int getNextNode(final int i, final int j, final int d) {
+  public static int getNextNode(final int i, final int j, final int d, int variant) {
     if (i == j) { return -1; }
     int cs = d << 1;
     int clusterDest = -1;
@@ -201,15 +209,25 @@ public class Utils {
       clusterDest = j % cs;
     } else {
       int[] axises = compareClusters(ci, cj, d);
-      int axis = axises[0];
-      int nextCluster = setDigit(ci, axis, getDigit(cj, axis));
+      if (variant >= axises.length << 1) { return -1; }
+      boolean opposite = false;
+      int axis =0;
+      if (variant < axises.length) {
+        axis = axises[variant];
+      } else {
+        axis = axises[variant - axises.length];
+        opposite = true;
+      }
+      int dValue = getDigit(cj, axis);
+      int nextCluster = !opposite ? setDigit(ci, axis, dValue) : setDigit(ci, axis, 3 - dValue - getDigit(ci, axis));
       NearInfo ni = getNearInfo(ci, nextCluster, d);
       clusterDest = ni.getSource();
       // jump
       if (clusterDest == i % cs) { return nextCluster * cs + ni.getDest(); }
+      variant = 0;
     }
     // move
-    int res = getNextInCluster(i % cs, clusterDest, d);
+    int res = getNextInCluster(i % cs, clusterDest, d, variant);
     res += ci * cs;
     return res;
   }
@@ -218,7 +236,7 @@ public class Utils {
     int currentNode = i;
     int res = 0;
     while (currentNode != j) {
-      currentNode = getNextNode(currentNode, j, d);
+      currentNode = getNextNode(currentNode, j, d, 0);
       res++;
     }
     return res;
