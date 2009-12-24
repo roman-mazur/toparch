@@ -99,7 +99,7 @@ public class Node {
     List<Object> toRemove = new LinkedList<Object>();
     for (Object mo : messages) {
       int[] m = (int[])mo;
-      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension(), 0);
+      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension());
       if (nextNode == mNext) { 
         m[2]++;
         if (m[2] == 4) { toRemove.add(m); }
@@ -114,7 +114,7 @@ public class Node {
     int[] result = null;
     for (Object mo : messages) {
       int[] m = (int[])mo;
-      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension(), m[2]);
+      int mNext = Utils.getNextNode(number, m[1], State.INSTANCE.getDimension());
       if (mNext == -1) { toRemove.add(m); }
       if (nextNode == mNext) { result = m; break; }
     }
