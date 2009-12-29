@@ -42,10 +42,7 @@ public abstract class Router<T extends InputData> {
   /**
    * @return the next step info
    */
-  public StepInfo next() {
-    System.out.println("111: " + inputDataFactory);
-    return next(formData());
-  }
+  public StepInfo next() { return next(formData()); }
   
   protected abstract StepInfo next(final T input);
   

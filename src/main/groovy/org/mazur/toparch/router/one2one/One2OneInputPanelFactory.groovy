@@ -63,7 +63,7 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
           }
         }
       }
-    } catch (Exception e) { println e.message }
+    } catch (Exception ignored) {  }
     return killedLinks
   }
   
