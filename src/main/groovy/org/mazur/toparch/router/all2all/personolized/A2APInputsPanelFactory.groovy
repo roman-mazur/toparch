@@ -2,7 +2,6 @@ package org.mazur.toparch.router.all2all.personolized
 
 
 import org.mazur.toparch.router.all2all.A2AInputsFactory;
-import org.mazur.toparch.router.all2all.M2MRouterInputs;
 import org.mazur.toparch.router.one2one.One2OneInputPanelFactory;
 
 import groovy.swing.SwingBuilder;
@@ -15,7 +14,7 @@ import javax.swing.JPanel;
 
 import org.mazur.toparch.router.LinkDescriptor;
 
-public class M2MPInputsPanelFactory  {
+public class A2APInputsPanelFactory  {
 
   private static SwingBuilder swing = new SwingBuilder()
   

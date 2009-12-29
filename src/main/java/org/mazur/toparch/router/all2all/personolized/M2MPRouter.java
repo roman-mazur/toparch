@@ -16,14 +16,14 @@ import org.mazur.toparch.router.InputDataPanelFactory;
 import org.mazur.toparch.router.LinkDescriptor;
 import org.mazur.toparch.router.Router;
 import org.mazur.toparch.router.all2all.A2AInputsFactory;
-import org.mazur.toparch.router.all2all.M2MRouterInputs;
+import org.mazur.toparch.router.all2all.A2ARouterInputs;
 
 /**
  * All to all personalized router.
  * @version: $Id$
  * @author Roman Mazur (mailto: mazur.roman@gmail.com)
  */
-public class M2MPRouter extends Router<M2MRouterInputs> {
+public class M2MPRouter extends Router<A2ARouterInputs> {
 
   private List<Node> nodes, nextStepNodes;
   
@@ -77,7 +77,7 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
   };
   
   @Override
-  protected InputDataPanelFactory<M2MRouterInputs> createFactory() { return new A2AInputsFactory(); }
+  protected InputDataPanelFactory<A2ARouterInputs> createFactory() { return new A2AInputsFactory(); }
 
   @Override
   public String getName() { return "all-to-all-personolized routing"; }
@@ -164,7 +164,7 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
   }
   
   @Override
-  protected StepInfo next(final M2MRouterInputs input) {
+  protected StepInfo next(final A2ARouterInputs input) {
     copyNodes();
     StepInfo result = new StepInfo();
     int internalStep = 0;
