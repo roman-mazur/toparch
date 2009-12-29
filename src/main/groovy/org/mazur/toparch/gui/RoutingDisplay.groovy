@@ -4,6 +4,8 @@ import groovy.swing.SwingBuilder
 
 import javax.swing.BoxLayout;
 import javax.swing.UIManager;
+import javax.swing.JPanel;
+import javax.swing.JFrame;
 
 import java.awt.BorderLayout as BL
 import java.awt.Dimension;
@@ -33,10 +35,26 @@ try {
 
 def showDistribFrame = {
   SwingBuilder.build {
-    frame(title : "Розподіл повідомлень", pack : true, visible : true) {
+    JPanel internalCotainer
+    JFrame internalFrame 
+    internalFrame = frame(title : "Розподіл повідомлень", pack : true, visible : true) {
       borderLayout()
+      panel(constraints : BL.NORTH, border : titledBorder('Фільтр')) {
+        borderLayout()
+        label(text : 'Вузли', constraints : BL.WEST)
+        def filterNodesText
+        filterNodesText = textField(text : 'all', action : action(closure : {
+          internalCotainer.removeAll()
+          def filterNodes = null
+          try {
+            filterNodes = filterNodesText.text.split(/\s*,\s*/).collect() { Integer.parseInt it }
+          } catch (def ignored) { println ignored.message }
+          internalCotainer.add(buildLastStepMessages(filterNodes))
+          internalFrame.pack()
+        }))
+      }
       scrollPane() {
-        widget(buildLastStepMessages())
+        internalCotainer = panel() { borderLayout() }
       }
     }
   }
@@ -79,6 +97,10 @@ SwingBuilder.build {
               button(action : MODEL_ALL) 
               button(action : MODEL_NEXT)
               button(action : RESET_ACTION)
+            }
+            hbox(border : compoundBorder(emptyBorder(2), titledBorder('Анімація'))) {
+              label('Затримка  ')
+              playTextArea = textField(text : '500')
               button(action : PLAY_ACTION)
               button(action : STOP_ACTION)
             }

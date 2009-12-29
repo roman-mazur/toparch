@@ -24,8 +24,8 @@ public final class HQDrawer {
   public static final Color LINK_COLOR = Color.GRAY; 
   public static final Color LINK_COLOR_H = Color.GREEN; 
   public static final Color LINK_COLOR_K = Color.RED; 
-  public static final Color TEXT_COLOR = Color.RED; 
-  public static final Color TEXT_COLOR_H = Color.BLACK; 
+  public static final Color TEXT_COLOR = Color.BLACK; 
+  public static final Color TEXT_COLOR_H = Color.BLUE; 
   public static final Color TEXT_COLOR_K = Color.WHITE; 
   
   private static final int COUNT_3D = 27 * 6;
@@ -41,11 +41,18 @@ public final class HQDrawer {
   private static void node(final Graphics2D canvas, final int x, final int y, final int number, final Color color, final Color textColor) {
     int r = NODES_RADIUS, d = r << 1;
     Ellipse2D.Double circle = new Ellipse2D.Double(x - r, y - r, d, d);
-    canvas.setPaint(color);
-    canvas.fill(circle);
+    if (color == NODES_COLOR) {
+      canvas.setPaint(Color.WHITE);
+      canvas.fill(circle);
+      canvas.setPaint(color);
+      canvas.draw(circle);
+    } else {
+      canvas.setPaint(color);
+      canvas.fill(circle);
+    }
     canvas.setPaint(textColor);
     canvas.setFont(new Font(Font.MONOSPACED, 0, 5));
-    canvas.drawString(String.valueOf(number), x - 3, y + 1);
+    canvas.drawString(String.valueOf(number), x - 3, y + 2);
   }
   
   public static void link2D(final Graphics2D canvas, final int i, final int j, final Color color) {

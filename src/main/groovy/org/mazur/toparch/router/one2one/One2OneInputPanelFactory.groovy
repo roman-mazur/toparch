@@ -22,17 +22,17 @@ class One2OneInputPanelFactory extends InputDataPanelFactory<One2OneInputs> {
     return swing.panel(name : "Input parameters for one-to-one") {
       vbox() {
         hbox(border : insetBorder) {
-          label("Source:")
+          label("Відправник:")
           hstrut(width : 10)
           sourceField = textField("0")
         }
         hbox(border : insetBorder) {
-          label("Destination:")
+          label("Отримувач:")
           hstrut(width : 10)
           destField = textField("3")
         }
         hbox(border : insetBorder) {
-          label("Killed nodes:")
+          label("Відмови:")
           hstrut(width : 10)
           killedField = textField("enter value")
         }
