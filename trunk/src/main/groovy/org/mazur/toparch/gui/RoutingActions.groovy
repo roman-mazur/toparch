@@ -25,7 +25,7 @@ import org.mazur.toparch.router.one2one.One2OneRouter
 import org.mazur.toparch.play.PlayList
 import org.mazur.toparch.router.LinkDescriptor
 
-import org.mazur.toparch.router.all2all.Node;
+import org.mazur.toparch.model.Node;
 import org.mazur.toparch.router.all2all.personolized.M2MPRouter;
 
 import org.w3c.dom.Document
@@ -46,7 +46,7 @@ class RoutingActions {
   ]
   
   /** Routers. */
-  private static def routers = [new One2OneRouter(), new M2MPRouter()]
+  private static def routers = [new M2MPRouter(), new One2OneRouter()]
   
   /** Selected router. */
   private static Router<?> selectedRouter = routers[0]
@@ -67,6 +67,9 @@ class RoutingActions {
   
   /** Routes text area. */
   static def routeTextArea
+  
+  /** Play period text area. */
+  static def playTextArea
   
   /** Current state. */
   private static RoutingState currentState = RoutingState.NONE
@@ -126,7 +129,7 @@ class RoutingActions {
     }
   }
 
-  public static def buildLastStepMessages() {
+  public static def buildLastStepMessages(def filterNodes) {
     String[][] messages = null
     if (!lastStep?.messagesDistribution) {
       try {
@@ -137,10 +140,12 @@ class RoutingActions {
     }
     return swing.panel(layout: swing.gridLayout(cols: 1, rows: messages.length)) {
       messages.eachWithIndex { nodeMessages, nodeIndex ->
-        hbox() {
-          String index = Node.formNumber(nodeIndex, 3)
-          label("Node ${index}: ")
-          nodeMessages.each { label("  $it  |") }
+        if (!filterNodes || filterNodes.contains(nodeIndex)) {
+          hbox() {
+            String index = Node.formNumber(nodeIndex, 3)
+            label("Node ${index}: ")
+            nodeMessages.each { label("  $it  |") }
+          }
         }
       }
     }
@@ -183,7 +188,7 @@ class RoutingActions {
   )
   
   static ZOOM_IN = swing.action(
-    name : "Zoom in",
+    name : "Збільшити",
     closure : {
       AffineTransform at = svgCanvas.getRenderingTransform()
       at.setToScale(at.getScaleX() * 2, at.getScaleY() * 2)
@@ -191,7 +196,7 @@ class RoutingActions {
     }
   )
   static ZOOM_OUT = swing.action(
-    name : "Zoom out",
+    name : "Зменшити",
     closure : {
       AffineTransform at = svgCanvas.getRenderingTransform()
       at.setToScale(at.getScaleX() / 2, at.getScaleY() / 2)
@@ -200,7 +205,7 @@ class RoutingActions {
   )
   
   static MODEL_ALL = swing.action(
-    name : "Model all",
+    name : "Усі кроки",
     closure : {
       if (currentState == RoutingState.ONE) {
         statusLabel.text = "You cannot model all at the current state. Finish the current process."
@@ -217,7 +222,7 @@ class RoutingActions {
     }
   )
   static MODEL_NEXT = swing.action(
-    name : "Model next",
+    name : "Наступний крок",
     closure : {
       if (currentState == RoutingState.NONE) { selectedRouter.reinit() }
       if (currentState != RoutingState.ALL) { currentState = RoutingState.ONE }
@@ -238,7 +243,7 @@ class RoutingActions {
   )
   
   static RESET_ACTION = swing.action(
-    name : "Reset",
+    name : "Скинути",
     closure : {
       currentState = RoutingState.NONE
       lastStep = null
@@ -251,13 +256,14 @@ class RoutingActions {
   private static boolean playStop = false
   
   static PLAY_ACTION = swing.action(
-    name : "Play",
+    name : "Старт",
     closure : {
       playStop = false
+      long delay = Long.parseLong(playTextArea.text)
       playThread = new CThread(action : {
         while (lastStep && !playStop) {
           MODEL_NEXT.actionPerformed(null)
-          Thread.sleep 200
+          Thread.sleep delay
         }
         playThread = null
       })
@@ -266,7 +272,7 @@ class RoutingActions {
   )
   
   static STOP_ACTION = swing.action(
-    name : "Stop",
+    name : "Стоп",
     closure : {
       playStop = true
     }

@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.mazur.toparch.State;
 import org.mazur.toparch.Utils;
+import org.mazur.toparch.model.Message;
+import org.mazur.toparch.model.Node;
 import org.mazur.toparch.play.HopInfo;
 import org.mazur.toparch.play.StepInfo;
 import org.mazur.toparch.router.InputDataPanelFactory;
@@ -15,7 +17,6 @@ import org.mazur.toparch.router.LinkDescriptor;
 import org.mazur.toparch.router.Router;
 import org.mazur.toparch.router.all2all.A2AInputsFactory;
 import org.mazur.toparch.router.all2all.M2MRouterInputs;
-import org.mazur.toparch.router.all2all.Node;
 
 /**
  * All to all personalized router.
@@ -81,26 +82,27 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
   @Override
   public String getName() { return "all-to-all-personolized routing"; }
 
-  private void send(int[] m, final int from, final int to) {
+  private void send(Message m, final int from, final int to) {
     Node sourceNode = nodes.get(from);
-    sourceNode.removeMessage(m[0], m[1]);
+    sourceNode.removeMessage(m);
     
     sourceNode = nextStepNodes.get(from);
     Node destinationNode = nextStepNodes.get(to);
-    int v = sourceNode.removeMessage(m[0], m[1]);
-    destinationNode.addMessage(m[0], m[1], v);
+    sourceNode.removeMessage(m);
+    destinationNode.addMessage(m);
   }
   
   public String[][] formMDistrib() {
-    String[][] result = new String[nodes.size()][];
+    String[][] result = new String[nextStepNodes.size()][];
     int index = 0;
-    for (Node node : nodes) {
+    for (Node node : nextStepNodes) {
       result[index++] = node.getMessages();
     }
     return result;
   }
 
   private void copyNodes() {
+    if (nextStepNodes != null) { nodes = nextStepNodes; }
     nextStepNodes = new ArrayList<Node>(nodes.size());
     for (Node node : nodes) {
       Node copy = new Node();
@@ -118,7 +120,7 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
     for (int i = 0; i < n; i++) {
       Node node = new Node();
       node.setNumber(i);
-      for (int j = 0; j < n; j++) { node.addMessage(i, j, 0); }
+      for (int j = 0; j < n; j++) { node.addMessage(new Message(i, j)); }
       nodes.add(node);
     }
     step = 0;
@@ -135,17 +137,16 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
   }
   
   private HopInfo resolve(final Node node, final HopResolver resolver, final List<LinkDescriptor> killed) {
-    System.out.println("Process node: " + node.getNumber() + " (circle-1 routing)");
     int nextNode = resolver.getNext(node.getNumber());
     if (isKilled(node.getNumber(), nextNode, killed)) {
-      node.markMessages(nextNode);
+      //node.markMessages(nextNode);
       return null;
     }
-    int[] message = node.selectMessage(nextNode);
+    Message message = node.selectMessage(nextNode);
     if (message == null) { return null; }
     StringBuilder description = new StringBuilder();
     send(message, node.getNumber(), nextNode);
-    description.append("M[").append(message[0]).append(",").append(message[1]).append("] ");
+    description.append(message);
     HopInfo info = new HopInfo();
     info.setDescription(description.toString());
     info.setSource(node.getNumber());
@@ -171,14 +172,12 @@ public class M2MPRouter extends Router<M2MRouterInputs> {
       HopResolver resolver = internalResolvers[step++ % internalResolvers.length];
       List<HopInfo> hops = runResolver(resolver, input.getKilled());
       if (hops.isEmpty()) {
-        nodes = nextStepNodes; 
         internalStep++;
         continue;
       }
       result.setHopsInfo(hops);
       break;
     }
-    nodes = nextStepNodes;
     if (result.getHopsInfo() == null) { return null; }
     result.setStep(step);
     result.setMessagesDistribution(formMDistrib());
