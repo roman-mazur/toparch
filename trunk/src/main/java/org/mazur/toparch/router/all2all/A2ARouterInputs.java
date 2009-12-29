@@ -11,7 +11,7 @@ import org.mazur.toparch.router.LinkDescriptor;
  * @version: $Id$
  * @author Roman Mazur (mailto: mazur.roman@gmail.com)
  */
-public class M2MRouterInputs implements InputData {
+public class A2ARouterInputs implements InputData {
 
   /** Killed nodes. */
   List<LinkDescriptor> killed;
