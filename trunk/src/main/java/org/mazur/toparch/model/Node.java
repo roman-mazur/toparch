@@ -1,12 +1,13 @@
 package org.mazur.toparch.model;
 
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.mazur.toparch.RouteFilter;
 import org.mazur.toparch.State;
 import org.mazur.toparch.Utils;
+import org.mazur.toparch.router.LinkDescriptor;
 
 /**
  * Node containing messages.
@@ -41,7 +42,10 @@ public class Node {
     String res = String.valueOf(number);
     if (res.length() >= length) { return res; }
     StringBuilder sb = new StringBuilder(res);
-    for (int i = 0; i < length - res.length(); i++) { sb.insert(0, "0"); }
+    int l = length - res.length();
+    char[] zeros = new char[l];
+    for (int i = 0; i < l; i++) { zeros[i] = '0'; }
+    sb.insert(0, zeros);
     return sb.toString();
   }
   
@@ -64,9 +68,7 @@ public class Node {
   /**
    * @param number the number to set
    */
-  public void setNumber(int number) {
-    this.number = number;
-  }
+  public void setNumber(int number) { this.number = number; }
 
   /**
    * @param messages the messages to set
@@ -77,7 +79,7 @@ public class Node {
   }
   
   public Message removeMessage(final int from, final int to) {
-    Message m = new Message(from, to);
+    Message m = new Message(from, to, null);
     return removeMessage(m);
   }
 
@@ -92,15 +94,31 @@ public class Node {
     this.buffers = new TreeSet<Message>(node.buffers);
   }
   
-  public Message selectMessage(final int nextNode) {
-    List<Object> toRemove = new LinkedList<Object>();
+  protected boolean isKilled(final int src, final int dst, final List<LinkDescriptor> killed) {
+    for (LinkDescriptor ld : killed) {
+      if ((ld.getSource() == src && ld.getDestination() == dst)
+          || (ld.getSource() == dst && ld.getDestination() == src)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public Message selectMessage(final int nextNode, final List<LinkDescriptor> killed, final List<Message> removed) {
     Message result = null;
-    for (Message m : buffers) {
-      int mNext = Utils.getNextNode(number, m.getDestination(), State.INSTANCE.getDimension());
-      if (mNext == -1) { toRemove.add(m); }
+    int d = State.INSTANCE.getDimension();
+    for (final Message m : buffers) {
+      int mNext = Utils.getNextNode(number, m.getDestination(), d, new RouteFilter() {
+        @Override
+        public boolean accept(int nextNode) { 
+          return !m.getVisitedNodes().get(nextNode) && !isKilled(number, nextNode, killed);
+        }
+      });
+      if (mNext == -1 && m.getDestination() != number) { 
+        removed.add(m); 
+      }
       if (nextNode == mNext) { result = m; break; }
     }
-    buffers.removeAll(toRemove);
     return result;
   }
   

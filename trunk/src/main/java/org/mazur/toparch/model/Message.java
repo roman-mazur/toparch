@@ -1,5 +1,7 @@
 package org.mazur.toparch.model;
 
+import java.util.BitSet;
+
 
 /**
  * Message sent between nodes.
@@ -14,9 +16,27 @@ public class Message {
   /** Destination. */
   private int destination;
 
-  public Message(final int source, final int destination) {
+  /** Visited nodes. */
+  private BitSet visitedNodes;
+  
+  /**
+   * @return the visitedNodes
+   */
+  public BitSet getVisitedNodes() {
+    return visitedNodes;
+  }
+
+  /**
+   * @param visitedNodes the visitedNodes to set
+   */
+  public void setVisitedNodes(final BitSet visitedNodes) {
+    this.visitedNodes = visitedNodes;
+  }
+
+  public Message(final int source, final int destination, final BitSet visitedNodes) {
     this.source = source;
     this.destination = destination;
+    this.visitedNodes = visitedNodes;
   }
   
   /**
@@ -52,7 +72,7 @@ public class Message {
   public int hashCode() { return (source << 10) | destination; }
 
   public Message copy() {
-    return new Message(source, destination);
+    return new Message(source, destination, visitedNodes);
   }
   
 }

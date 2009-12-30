@@ -3,6 +3,7 @@ package org.mazur.toparch.router.all2all.personolized;
 import static org.mazur.toparch.Utils.getNodesCount;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -88,7 +89,8 @@ public class M2MPRouter extends Router<A2ARouterInputs> {
     
     sourceNode = nextStepNodes.get(from);
     Node destinationNode = nextStepNodes.get(to);
-    sourceNode.removeMessage(m);
+    m = sourceNode.removeMessage(m);
+    m.getVisitedNodes().set(from);
     destinationNode.addMessage(m);
   }
   
@@ -120,29 +122,20 @@ public class M2MPRouter extends Router<A2ARouterInputs> {
     for (int i = 0; i < n; i++) {
       Node node = new Node();
       node.setNumber(i);
-      for (int j = 0; j < n; j++) { node.addMessage(new Message(i, j)); }
+      for (int j = 0; j < n; j++) { node.addMessage(new Message(i, j, new BitSet(n))); }
       nodes.add(node);
     }
     step = 0;
   }
   
-  protected boolean isKilled(final int src, final int dst, final List<LinkDescriptor> killed) {
-    for (LinkDescriptor ld : killed) {
-      if ((ld.getSource() == src && ld.getDestination() == dst)
-          || (ld.getSource() == dst && ld.getDestination() == src)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
   private HopInfo resolve(final Node node, final HopResolver resolver, final List<LinkDescriptor> killed) {
     int nextNode = resolver.getNext(node.getNumber());
-    if (isKilled(node.getNumber(), nextNode, killed)) {
-      //node.markMessages(nextNode);
-      return null;
+    LinkedList<Message> removed = new LinkedList<Message>();
+    Message message = node.selectMessage(nextNode, killed, removed);
+    for (Message toRemove : removed) {
+      node.removeMessage(toRemove);
+      nextStepNodes.get(node.getNumber()).removeMessage(toRemove);
     }
-    Message message = node.selectMessage(nextNode);
     if (message == null) { return null; }
     StringBuilder description = new StringBuilder();
     send(message, node.getNumber(), nextNode);
@@ -165,6 +158,7 @@ public class M2MPRouter extends Router<A2ARouterInputs> {
   
   @Override
   protected StepInfo next(final A2ARouterInputs input) {
+    System.out.println("Step " + step);
     copyNodes();
     StepInfo result = new StepInfo();
     int internalStep = 0;

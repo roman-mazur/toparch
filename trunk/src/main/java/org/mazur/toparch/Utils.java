@@ -1,7 +1,19 @@
 package org.mazur.toparch;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Utils {
 
+  private static RouteFilter ALL_WORKING = new RouteFilter() {
+    @Override
+    public boolean accept(int nextNode) { return true; }
+  };
+  
   /**
    * We have 2 connectors for the same axis: 0 and 1.
    * ---------
@@ -157,9 +169,29 @@ public class Utils {
   public static int getInClusterDistance(final int i, final int j, final int d) {
     int next = getNextInCluster(i, j, d);
     if (next == i) { return 0; }
-    return getInClusterDistance(next, j, d) + 1; 
+    try {
+      return getInClusterDistance(next, j, d) + 1; 
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
   }
   
+  public static int getNextRouteInCluster(final int i, final int j, final int d, final RouteFilter filter) {
+    int cs = d << 1;
+    // form partners
+    List<Integer> partners = new ArrayList<Integer>(Arrays.asList((i + 1) % cs, (i + d) % cs, i == 0 ? cs - 1 : i - 1));
+    // sort them to define those that give the minimum distance
+    Collections.sort(partners, new Comparator<Integer>() {
+      @Override
+      public int compare(Integer p1, Integer p2) { return getInClusterDistance(p1, j, d) - getInClusterDistance(p2, j, d); }
+    });
+    int next = -1;
+    // find 
+    for (int p : partners) {
+      if (filter.accept(p)) { next = p; break; }
+    }
+    return next;
+  }
   public static int getNextInCluster(final int i, int j, final int d) {
     int cs = d << 1;
     int dif = j - i;
@@ -175,54 +207,69 @@ public class Utils {
     if (next < 0) { next = cs + next; }
     return next;
   }
-  public static int getInClusterCircleDistance(final int i, final int j, final int d) {
-    int dif = Math.abs(i - j);
-    if (dif == 0) { return 0; }
-    int cs = d << 1;
-    int next = (i + (dif >= d ? d : 1)) % cs;
-    return getInClusterCircleDistance(next, j, d) + 1;
-  }
   
   public static int getNodesCount(final int d) {
     return ((int)(Math.pow(3, d)) * d) << 1;
   }
   
-  public static int getFirstDestinationJP(final int currentNode, final int destinationNode, final int d) {
-    int cs = d << 1;
-    int currentCluster = currentNode / cs;
-    int destCluster = destinationNode / cs;
-    if (currentCluster == destCluster) { return destinationNode; }
-    int[] axises = Utils.compareClusters(currentCluster, destCluster, d);
-    int selectedAxis = axises[0];
-    int v = Utils.getDigit(destCluster, selectedAxis);
-    int transitionCluster = Utils.setDigit(currentCluster, selectedAxis, v);
-    int connectJumpPoint = Utils.getNearInfo(currentCluster, transitionCluster, d).getSource();
-    connectJumpPoint += currentCluster * cs;
-    return connectJumpPoint;
-  }
-  
-  public static int getNextNode(final int i, final int j, final int d) {
+  public static int getNextNode(final int i, final int j, final int d, final RouteFilter filter) {
     if (i == j) { return -1; }
-    int cs = d << 1;
-    int clusterDest = -1;
-    int ci = i / cs, cj = j /cs;
-    if (ci == cj) {
-      clusterDest = j % cs;
-    } else {
+    final int cs = d << 1;
+    final int ci = i / cs, cj = j /cs;
+    final int clusterSource = i % cs;
+
+    RouteFilter filterWrapper = new RouteFilter() {
+      @Override
+      public boolean accept(final int clusterIndex) { return filter.accept(ci * cs + clusterIndex); }
+    };
+    
+    if (ci == cj) { // same cluster
+      int clusterDest = j % cs;
+      int res = getNextRouteInCluster(clusterSource, clusterDest, d, filterWrapper);
+      if (res < 0) { return -1; }
+      return ci * cs + res;
+    } else { // between clusters
+      // find transition clusters
       int[] axises = compareClusters(ci, cj, d);
-      int axis = axises[0];
-      int dValue = getDigit(cj, axis);
-      int nextCluster = setDigit(ci, axis, dValue);
-      NearInfo ni = getNearInfo(ci, nextCluster, d);
-      clusterDest = ni.getSource();
-      // jump
-      if (clusterDest == i % cs) { return nextCluster * cs + ni.getDest(); }
+      int[] transitionClusters = new int[axises.length];
+      for (int k = 0; k < transitionClusters.length; k++) {
+        transitionClusters[k] = Utils.setDigit(ci, axises[k], Utils.getDigit(cj, axises[k]));
+      }
+      // define jump points to that clusters
+      List<Integer> jumpPoints = new ArrayList<Integer>(cs);
+      for (int cluster : transitionClusters) {
+        jumpPoints.add(Utils.getNearInfo(ci, cluster, d).getSource());
+      }
+      Collections.sort(jumpPoints, new Comparator<Integer>() {
+        @Override
+        public int compare(Integer p1, Integer p2) {
+          return Utils.getInClusterDistance(p1, clusterSource, d) - Utils.getInClusterDistance(p2, clusterSource, d);
+        }
+      });
+      List<Integer> altJP = new LinkedList<Integer>();
+      for (Integer jp : jumpPoints) { altJP.add((jp + d) % cs); }
+      jumpPoints.addAll(altJP);
+      for (int k = 0; k < cs; k++) { if (!jumpPoints.contains(k)) { jumpPoints.add(k); } }
+      
+      // try jump points
+      for (Integer njp : jumpPoints) {
+        int jpNode = cs * ci + njp;
+        int nextNode = getNearClusterConnection(jpNode, d);
+        if (!filter.accept(nextNode)) { continue; } // we were there
+        if (i == jpNode) {
+          // jump
+          return nextNode;
+        } else {
+          // move in cluster[
+          if (!filter.accept(jpNode)) { continue; }
+          int res = getNextRouteInCluster(clusterSource, njp, d, filterWrapper);
+          if (res >= 0) { return ci * cs + res; }
+        }
+      }
+      return -1;
     }
-    // move
-    int res = getNextInCluster(i % cs, clusterDest, d);
-    res += ci * cs;
-    return res;
   }
+  public static int getNextNode(int i, int j, int d) { return getNextNode(i, j, d, ALL_WORKING); }
   
   public static int getRouteDistance(final int i, final int j, final int d) {
     int currentNode = i;
