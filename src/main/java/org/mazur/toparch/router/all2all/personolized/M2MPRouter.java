@@ -81,7 +81,7 @@ public class M2MPRouter extends Router<A2ARouterInputs> {
   protected InputDataPanelFactory<A2ARouterInputs> createFactory() { return new A2AInputsFactory(); }
 
   @Override
-  public String getName() { return "all-to-all-personolized routing"; }
+  public String getName() { return "Усі до всіх з персональним призначенням"; }
 
   private void send(Message m, final int from, final int to) {
     Node sourceNode = nodes.get(from);

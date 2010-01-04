@@ -24,7 +24,7 @@ class One2OneRouter extends GroovyRouter<One2OneInputs> {
   private HashSet<Integer> visited = new HashSet<Integer>()
   
   @Override
-  public String getName() { return "one-to-one routing" }
+  public String getName() { return "ќдин до одного" }
 
   @Override
   public void reinit() {
