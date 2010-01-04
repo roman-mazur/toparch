@@ -19,7 +19,6 @@ public abstract class Router<T extends InputData> {
   
   public Router() {
     inputDataFactory = createFactory();
-    System.out.println(inputDataFactory);
   }
   
   /**
