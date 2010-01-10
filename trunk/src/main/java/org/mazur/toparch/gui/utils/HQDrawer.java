@@ -21,6 +21,7 @@ public final class HQDrawer {
   public static final Color NODES_COLOR = Color.BLUE; 
   public static final Color NODES_COLOR_H = Color.GREEN; 
   public static final Color NODES_COLOR_K = Color.RED; 
+  public static final Color NODES_COLOR_M = Color.CYAN; 
   public static final Color LINK_COLOR = Color.GRAY; 
   public static final Color LINK_COLOR_H = Color.GREEN; 
   public static final Color LINK_COLOR_K = Color.RED; 
@@ -235,5 +236,5 @@ public final class HQDrawer {
     }
   }
   
-  private HQDrawer() { }
+  private HQDrawer() { /* hidden */ }
 }

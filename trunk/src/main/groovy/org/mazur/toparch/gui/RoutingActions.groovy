@@ -25,9 +25,10 @@ import org.mazur.toparch.router.one2one.One2OneRouter
 import org.mazur.toparch.play.PlayList
 import org.mazur.toparch.router.LinkDescriptor
 import org.mazur.toparch.router.one2all.O2ARouter
+import org.mazur.toparch.router.multicast.MulticastRouter;
 
 import org.mazur.toparch.model.Node;
-import org.mazur.toparch.router.all2all.personolized.M2MPRouter;
+import org.mazur.toparch.router.all2all.personolized.A2APRouter;
 
 import org.w3c.dom.Document
 
@@ -47,7 +48,7 @@ class RoutingActions {
   ]
   
   /** Routers. */
-  private static def routers = [new O2ARouter(), new M2MPRouter(), new One2OneRouter()]
+  private static def routers = [new MulticastRouter(), new O2ARouter(), new A2APRouter(), new One2OneRouter()]
   
   /** Selected router. */
   private static Router<?> selectedRouter = routers[0]
@@ -130,12 +131,18 @@ class RoutingActions {
     }
   }
 
+  private static void drawMarkedNodes(final Collection<Node> nodes) {
+    currentCanvas.commitDraw() {
+      selectedDrawer.drawMarked(currentCanvas.graphics, nodes.collect { it.number })
+    }
+  }
+  
   public static def buildLastStepMessages(def filterNodes) {
     String[][] messages = null
     if (!lastStep?.messagesDistribution) {
       try {
         messages = selectedRouter.formMDistrib()
-      } catch (def e) { return swing.label("No messages") }
+      } catch (def e) { return swing.label("Для даної маршрутизації розподіл повідомлень не відображується") }
     } else {
       messages = lastStep.messagesDistribution
     }
@@ -144,7 +151,7 @@ class RoutingActions {
         if (!filterNodes || filterNodes.contains(nodeIndex)) {
           hbox() {
             String index = Node.formNumber(nodeIndex, 3)
-            label("Node ${index}: ")
+            label("Вузол ${index}: ")
             nodeMessages.each { label("  $it  |") }
           }
         }
@@ -159,7 +166,7 @@ class RoutingActions {
       if (selName) {
         selectedRouter = routers.find { it?.name == selName }
       }
-      statusLabel.text = "Selected router: ${selectedRouter?.name}"
+      statusLabel.text = "Вибрано маршрутизацію: ${selectedRouter?.name}"
       
       if (selectedRouter) {
         def panel = selectedRouter.getGUIPanel()
@@ -181,7 +188,7 @@ class RoutingActions {
       case '2D' : State.INSTANCE.dimension = 2; break 
       case '3D' : State.INSTANCE.dimension = 3; break 
       }
-      statusLabel.text = "Selected dimension: ${State.INSTANCE.dimension}D"
+      statusLabel.text = "Вибрано розмірність: ${State.INSTANCE.dimension}D"
  
       selectedDrawer = drawers[State.INSTANCE.dimension]
       redraw()
@@ -209,7 +216,7 @@ class RoutingActions {
     name : "Усі кроки",
     closure : {
       if (currentState == RoutingState.ONE) {
-        statusLabel.text = "You cannot model all at the current state. Finish the current process."
+        statusLabel.text = "Потрібно завершити поточну маршрутизацію"
         return
       }
       currentState = RoutingState.ALL
@@ -220,6 +227,7 @@ class RoutingActions {
         drawCurrentStep(it)
         routeTextArea.text = routeTextArea.text + it.toString() + "\n" 
       }
+      statusLabel.text = "Завершено"
     }
   )
   static MODEL_NEXT = swing.action(
@@ -229,10 +237,11 @@ class RoutingActions {
       if (currentState != RoutingState.ALL) { currentState = RoutingState.ONE }
       clearLastStep()
       drawKilled(selectedRouter.getInputDataFactory().getKilled())
+      drawMarkedNodes(selectedRouter.getMarkedNodes())
       StepInfo newStep = selectedRouter.next()
       if (!newStep) {
         currentState = RoutingState.NONE
-        statusLabel.text = "Finished"
+        statusLabel.text = "Завершено"
       } else {
         drawCurrentStep(newStep)
         String t = (newStep.hopsInfo.collect { it.description }).toListString()

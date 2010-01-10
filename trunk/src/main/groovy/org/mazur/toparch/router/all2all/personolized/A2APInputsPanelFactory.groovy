@@ -23,7 +23,7 @@ public class A2APInputsPanelFactory  {
     def insetBorder = swing.compoundBorder(swing.raisedEtchedBorder(), new EmptyBorder(5,5,5,5));
     return swing.panel() {
       hbox(border : insetBorder) {
-        label("Killed nodes:")
+        label("Відмови:")
         hstrut(width : 10)
         def killedField = textField("enter value")
         setter(killedField)

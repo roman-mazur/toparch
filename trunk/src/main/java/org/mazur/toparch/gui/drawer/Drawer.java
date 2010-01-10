@@ -12,11 +12,14 @@ import org.mazur.toparch.router.LinkDescriptor;
  */
 public interface Drawer {
 
-  public void drawBG(final Graphics2D canvas);
+  void drawBG(final Graphics2D canvas);
   
-  public void drawHop(final Graphics2D canvas, final int i, final int j);
+  void drawHop(final Graphics2D canvas, final int i, final int j);
 
-  public void clearHop(final Graphics2D canvas, final int i, final int j);
+  void clearHop(final Graphics2D canvas, final int i, final int j);
   
-  public void drawKilled(final Graphics2D canvas, final Collection<LinkDescriptor> killed);
+  void drawKilled(final Graphics2D canvas, final Collection<LinkDescriptor> killed);
+  
+  void drawMarked(final Graphics2D canvas, final Collection<Integer> nodes);
+  
 }

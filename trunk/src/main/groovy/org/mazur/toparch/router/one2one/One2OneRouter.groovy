@@ -139,12 +139,12 @@ class One2OneRouter extends GroovyRouter<One2OneInputs> {
   protected StepInfo next(final One2OneInputs input) {
     int destNode = input.destination
     if (currentNode == destNode) { return null }
-    visited.add currentNode
     step++
     
     int d = State.INSTANCE.dimension
     int cs = d << 1
     if (currentNode < 0) { currentNode = input.source }
+    visited.add currentNode
     println "Routing $currentNode -> $destNode"
 
     int currentCluster = currentNode / cs

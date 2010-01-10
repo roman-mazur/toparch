@@ -17,7 +17,8 @@ public class O2AInputsPanelFactory {
   @Override
   public static JPanel createPanel(def setter) {
     def insetBorder = swing.compoundBorder(swing.raisedEtchedBorder(), new EmptyBorder(5,5,5,5));
-    return swing.panel(name : "Input parameters for one-to-one") {
+    def sourceField, killedField
+    def result = swing.panel(name : "Input parameters for one-to-one") {
       vbox() {
         hbox(border : insetBorder) {
           label("Відправник:")
@@ -31,6 +32,8 @@ public class O2AInputsPanelFactory {
         }
       }
     }
+    setter(sourceField, killedField)
+    return result
   }
   
 }

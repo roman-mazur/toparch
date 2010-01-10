@@ -74,4 +74,11 @@ public class Drawer2D implements Drawer {
     }
   }
 
+  @Override
+  public void drawMarked(final Graphics2D canvas, final Collection<Integer> nodes) {
+    for (int n : nodes) {
+      HQDrawer.node2D(canvas, n, HQDrawer.NODES_COLOR_M, HQDrawer.TEXT_COLOR);
+    }
+  }
+
 }

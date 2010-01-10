@@ -1,11 +1,16 @@
 package org.mazur.toparch.router;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Set;
 
 import javax.swing.JPanel;
 
+import org.mazur.toparch.State;
+import org.mazur.toparch.model.Node;
 import org.mazur.toparch.play.PlayList;
 import org.mazur.toparch.play.StepInfo;
+import org.mazur.toparch.Utils;
 
 /**
  * Router that does a model process.
@@ -16,6 +21,53 @@ public abstract class Router<T extends InputData> {
 
   /** Factory. */
   private InputDataPanelFactory<T> inputDataFactory;
+  
+  protected static HopResolver[] STANDARD_RESOLVERS = new HopResolver[] {
+      // =================== circle routing ===================
+      new HopResolver() {
+        @Override
+        public int getNext(final int current) {
+          int cs = State.INSTANCE.getDimension() << 1;
+          int cluster = current / cs;
+          int ci = current % cs;
+          ci--;
+          if (ci < 0) { ci += cs; }
+          return cluster * cs + ci;
+        }
+      },
+
+     // =================== opposite routing ===================
+     new HopResolver() {
+        @Override
+        public int getNext(final int current) {
+          int d = State.INSTANCE.getDimension();
+          int cs = d << 1;
+          int cluster = current / cs;
+          int ci = current % cs;
+          ci += d; ci %= cs;
+          return cluster * cs + ci;
+        }
+    },
+    
+    // =================== circle routing ===================
+    new HopResolver() {
+      @Override
+      public int getNext(final int current) {
+        int cs = State.INSTANCE.getDimension() << 1;
+        int cluster = current / cs;
+        int ci = (current % cs + 1) % cs;
+        return cluster * cs + ci;
+      }
+    },
+    
+    // =================== clusters routing ===================
+    new HopResolver() {
+      @Override
+      public int getNext(final int current) {
+        return Utils.getNearClusterConnection(current, State.INSTANCE.getDimension());
+      }
+    }
+  };
   
   public Router() {
     inputDataFactory = createFactory();
@@ -32,6 +84,8 @@ public abstract class Router<T extends InputData> {
   public JPanel getGUIPanel() { return inputDataFactory.getPanel(); }
   
   protected abstract InputDataPanelFactory<T> createFactory();
+  
+  public Set<? extends Node> getMarkedNodes() { return Collections.emptySet(); }
   
   /**
    * Prepare.

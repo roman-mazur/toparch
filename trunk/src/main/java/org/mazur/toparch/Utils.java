@@ -281,7 +281,7 @@ public class Utils {
     return res;
   }
   
-  private Utils() {}
+  private Utils() { /* hidden */ }
   
   public static class NearInfo {
     private int axis, source, dest;
