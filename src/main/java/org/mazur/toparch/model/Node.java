@@ -49,6 +49,10 @@ public class Node {
     return sb.toString();
   }
   
+  protected String describeMessage(final Message m, final int zerosCount) {
+    return formNumber(m.getSource(), zerosCount) + "," + formNumber(m.getDestination(), zerosCount);
+  }
+  
   /**
    * @return the messages
    */
@@ -60,7 +64,7 @@ public class Node {
     int zerosCount = 0;
     while (n > 0) { zerosCount++; n /= 10; }
     for (Message m : buffers) {
-      result[index++] = formNumber(m.getSource(), zerosCount) + "," + formNumber(m.getDestination(), zerosCount);
+      result[index++] = describeMessage(m, zerosCount);
     }
     return result; 
   }
@@ -94,7 +98,8 @@ public class Node {
     this.buffers = new TreeSet<Message>(node.buffers);
   }
   
-  protected boolean isKilled(final int src, final int dst, final List<LinkDescriptor> killed) {
+  protected static boolean isKilled(final int src, final int dst, final List<LinkDescriptor> killed) {
+    if (killed == null || killed.isEmpty()) { return false; }
     for (LinkDescriptor ld : killed) {
       if ((ld.getSource() == src && ld.getDestination() == dst)
           || (ld.getSource() == dst && ld.getDestination() == src)) {
@@ -104,22 +109,30 @@ public class Node {
     return false;
   }
   
+  public static RouteFilter createRouteFilter(final int number, final Message m, final List<LinkDescriptor> killed) {
+    return new RouteFilter() {
+      @Override
+      public boolean accept(int nextNode) { 
+        return !m.getVisitedNodes().get(nextNode) && !isKilled(number, nextNode, killed);
+      }
+    };
+  }
+  
   public Message selectMessage(final int nextNode, final List<LinkDescriptor> killed, final List<Message> removed) {
     Message result = null;
     int d = State.INSTANCE.getDimension();
     for (final Message m : buffers) {
-      int mNext = Utils.getNextNode(number, m.getDestination(), d, new RouteFilter() {
-        @Override
-        public boolean accept(int nextNode) { 
-          return !m.getVisitedNodes().get(nextNode) && !isKilled(number, nextNode, killed);
-        }
-      });
+      int mNext = Utils.getNextNode(number, m.getDestination(), d, createRouteFilter(number, m, killed));
       if (mNext == -1 && m.getDestination() != number) { 
         removed.add(m); 
       }
       if (nextNode == mNext) { result = m; break; }
     }
     return result;
+  }
+  
+  protected TreeSet<Message> getBuffers() {
+    return buffers;
   }
   
   @Override

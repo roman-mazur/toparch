@@ -75,4 +75,11 @@ public class Drawer3D implements Drawer {
       if (e.getValue() >= 4) { HQDrawer.node3D(canvas, e.getKey(), HQDrawer.NODES_COLOR_K, HQDrawer.TEXT_COLOR_K); }
     }
   }
+
+  @Override
+  public void drawMarked(Graphics2D canvas, Collection<Integer> nodes) {
+    for (int n : nodes) {
+      HQDrawer.node3D(canvas, n, HQDrawer.NODES_COLOR_M, HQDrawer.TEXT_COLOR);
+    }
+  }
 }
