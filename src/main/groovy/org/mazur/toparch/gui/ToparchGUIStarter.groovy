@@ -14,12 +14,17 @@ import static org.jfree.chart.ChartFactory.*
 import static org.mazur.toparch.gui.Actions.*
 import static org.mazur.toparch.gui.InfoReader.*
 
+//def sources = [
+//  circles   : "out-class org.mazur.toparch.CirclesGenerator.txt",
+//  fibonachi : "out-class org.mazur.toparch.FibonachiGenerator.txt",
+//  mesh      : "out-class org.mazur.toparch.MeshGenerator.txt",
+//  pyramids  : "out-class org.mazur.toparch.PyramidsGenerator.txt",
+//  spiral    : "out-class org.mazur.toparch.SpiralGenerator.txt"
+//]
+
 def sources = [
-  circles   : "out-class org.mazur.toparch.CirclesGenerator.txt",
-  fibonachi : "out-class org.mazur.toparch.FibonachiGenerator.txt",
-  mesh      : "out-class org.mazur.toparch.MeshGenerator.txt",
-  pyramids  : "out-class org.mazur.toparch.PyramidsGenerator.txt",
-  spiral    : "out-class org.mazur.toparch.SpiralGenerator.txt"
+  hq3WithClusters : "out-class org.mazur.toparch.analyze.HQGenerator.txt",
+  hq2 : "out-class org.mazur.toparch.analyze.HQClassicGenerator.txt",
 ]
 
 content = [:]

@@ -5,7 +5,7 @@ import org.mazur.toparch.Utils;
 class HQGenerator implements TopologyGenerator {
   
   /** Current step. */
-  private int d = 1
+  private int d = 4
   
   public boolean[][] nextMatrix() {
     d++
